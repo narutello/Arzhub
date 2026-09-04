@@ -38,20 +38,37 @@ export function PriceChart({
   });
 
   const points = query.data?.points ?? [];
-  const stroke = quote.direction === "down" ? "var(--down)" : "var(--up)";
+  const isUp = quote.direction !== "down";
+  const stroke = isUp ? "var(--up)" : "var(--down)";
+  const isLoading = query.isLoading || (query.isFetching && points.length === 0);
+  const hasError = !isLoading && (!query.data?.ok || points.length === 0);
 
   return (
-    <section className="rounded-xl bg-card p-4 shadow-card">
+    <section className="rounded-xl bg-card p-4 shadow-card sm:p-5">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-base font-medium">نمودار قیمت</h2>
-        <div className="flex flex-wrap gap-1">
+        <div>
+          <h2 className="text-base font-medium">نمودار قیمت</h2>
+          <p className="mt-0.5 text-xs text-subtle">
+            قیمت فعلی:{" "}
+            <span className="font-medium text-foreground tabular-nums">
+              {formatToman(quote.price, quote.currency.decimals)}
+            </span>{" "}
+            تومان
+          </p>
+        </div>
+        <div
+          className="flex flex-wrap gap-1"
+          role="group"
+          aria-label="بازه زمانی نمودار"
+        >
           {CHART_RANGES.map((r) => (
             <button
               key={r.id}
               type="button"
               onClick={() => setRange(r.id)}
+              disabled={query.isFetching && range === r.id}
               className={cn(
-                "h-9 rounded-md px-3 text-xs transition-colors duration-150",
+                "h-9 min-w-[3.25rem] rounded-md px-2.5 text-xs font-medium transition-colors duration-150",
                 range === r.id
                   ? "bg-foreground text-background"
                   : "bg-card-2 text-muted hover:text-foreground",
@@ -63,30 +80,45 @@ export function PriceChart({
         </div>
       </div>
 
-      {query.isLoading ? (
-        <Skeleton className="h-64 w-full rounded-lg" />
-      ) : !query.data?.ok || points.length === 0 ? (
-        <p className="py-12 text-center text-sm text-muted">
-          {query.data?.error ?? "نمودار این بازه در دسترس نیست."}
-        </p>
+      {isLoading ? (
+        <div className="flex h-64 w-full flex-col justify-center gap-3 rounded-lg">
+          <Skeleton className="h-full w-full rounded-lg" />
+        </div>
+      ) : hasError ? (
+        <div className="flex h-64 flex-col items-center justify-center gap-2 rounded-lg bg-card-2/50 px-4 text-center">
+          <p className="text-sm text-muted">
+            {query.data?.error ?? "نمودار این بازه در دسترس نیست."}
+          </p>
+          <p className="text-xs text-subtle">
+            دادهٔ تاریخی از TGJU برای این بازه موجود نیست یا موقتاً در دسترس نیست.
+          </p>
+        </div>
       ) : (
-        <div dir="ltr" className="h-64 w-full">
+        <div dir="ltr" className="h-64 w-full sm:h-72">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <AreaChart
+              data={points}
+              margin={{ top: 10, right: 4, left: 0, bottom: 4 }}
+            >
               <defs>
-                <linearGradient id="arzFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={stroke} stopOpacity={0.28} />
-                  <stop offset="100%" stopColor={stroke} stopOpacity={0} />
+                <linearGradient id={`arzFill-${quote.code}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={stroke} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={stroke} stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="var(--border)" vertical={false} />
+              <CartesianGrid
+                stroke="var(--border)"
+                vertical={false}
+                strokeDasharray="3 3"
+              />
               <XAxis
                 dataKey="date"
                 tickFormatter={formatChartTick}
                 tick={{ fill: "var(--muted)", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
-                minTickGap={28}
+                minTickGap={32}
+                dy={6}
               />
               <YAxis
                 orientation="right"
@@ -96,42 +128,61 @@ export function PriceChart({
                 tick={{ fill: "var(--muted)", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
-                width={72}
+                width={70}
                 domain={["auto", "auto"]}
+                dx={4}
               />
               <Tooltip
                 contentStyle={{
                   background: "var(--card)",
                   border: "1px solid var(--border)",
-                  borderRadius: 8,
+                  borderRadius: 10,
                   direction: "rtl",
                   fontFamily: "Vazirmatn, sans-serif",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                  padding: "8px 12px",
                 }}
+                itemStyle={{ color: "var(--foreground)" }}
+                labelStyle={{ color: "var(--muted)", marginBottom: 4 }}
                 formatter={(value) => [
                   formatToman(Number(value), quote.currency.decimals),
-                  "تومان",
+                  "قیمت پایانی",
                 ]}
                 labelFormatter={(_, payload) => {
-                  const p = payload?.[0]?.payload as { jalali?: string } | undefined;
-                  return p?.jalali ? toFaDigits(p.jalali) : "";
+                  const p = payload?.[0]?.payload as
+                    | { jalali?: string; date?: string }
+                    | undefined;
+                  if (p?.jalali) return toFaDigits(p.jalali);
+                  if (p?.date) return formatChartTick(p.date);
+                  return "";
                 }}
               />
               <Area
                 type="monotone"
                 dataKey="close"
                 stroke={stroke}
-                strokeWidth={1.75}
-                fill="url(#arzFill)"
+                strokeWidth={2}
+                fill={`url(#arzFill-${quote.code})`}
                 dot={false}
+                activeDot={{
+                  r: 4,
+                  strokeWidth: 2,
+                  fill: "var(--card)",
+                  stroke,
+                }}
                 isAnimationActive={false}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
+
       <p className="mt-3 text-xs text-subtle">
-        داده‌های تاریخی از {query.data?.sourceName ?? "TGJU"} — قیمت پایانی روزانه به
-        تومان.
+        داده‌های تاریخی از{" "}
+        <span className="text-muted">
+          {query.data?.sourceName ?? "شبکه اطلاع‌رسانی طلا و ارز (TGJU)"}
+        </span>
+        {" "}— قیمت پایانی روزانه به تومان.
       </p>
     </section>
   );

@@ -37,7 +37,7 @@ export type ChartPoint = {
   close: number;
 };
 
-export type ChartRange = "7d" | "1m" | "3m" | "6m" | "1y" | "5y";
+export type ChartRange = "1d" | "1w" | "1m" | "3m" | "6m" | "1y";
 
 export type ChartResult = {
   ok: boolean;
@@ -49,12 +49,12 @@ export type ChartResult = {
 };
 
 export const CHART_RANGES: { id: ChartRange; label: string; days: number }[] = [
-  { id: "7d", label: "۷ روز", days: 7 },
+  { id: "1d", label: "۱ روز", days: 2 },
+  { id: "1w", label: "۱ هفته", days: 7 },
   { id: "1m", label: "۱ ماه", days: 30 },
   { id: "3m", label: "۳ ماه", days: 90 },
   { id: "6m", label: "۶ ماه", days: 180 },
   { id: "1y", label: "۱ سال", days: 365 },
-  { id: "5y", label: "۵ سال", days: 1825 },
 ];
 
 export const CACHE_KEY = "arzhub-last-snapshot";
