@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "ارزهاب | قیمت لحظه‌ای ارز به تومان",
+      "hasCanvas": false,
+      "bodyTextLen": 3348,
+      "bodyTextHash": "a69fe3dd69b86a0e6e9cd622401e12ac382ac00f38a1ff875ee4d1dc2415cb90",
+      "bodyTextPrefix": "ارزهاب بازار آزاد خانه ارزها تبدیل نشان‌شده بازار ارز قیمت‌های ب",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "ارزهاب | قیمت لحظه‌ای ارز به تومان",
+      "hasCanvas": false,
+      "bodyTextLen": 3337,
+      "bodyTextHash": "eb7917d75cd72ae2d278bb82f151db66a708215be210d8ffe07b3138bffde4c1",
+      "bodyTextPrefix": "ارزهاب بازار ارز قیمت‌های بازار آزاد تهران، به تومان. بدون نرخ ر",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
