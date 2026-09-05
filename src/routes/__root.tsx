@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { AppProviders } from "@/components/providers";
@@ -67,6 +68,7 @@ function RootComponent() {
             </Shell>
           </AppProviders>
         </AuthProvider>
+        <Analytics />
         <Scripts />
       </body>
     </html>
