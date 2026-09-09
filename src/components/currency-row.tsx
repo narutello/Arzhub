@@ -10,25 +10,27 @@ export function CurrencyRow({ quote }: { quote: Quote }) {
     <Link
       to="/currencies/$code"
       params={{ code: quote.code.toLowerCase() }}
-      className="flex min-h-16 items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 hover:bg-card"
+      className="flex min-h-[60px] items-center gap-3 px-3 py-2 active:bg-card-2/60"
     >
-      <StarButton code={quote.code} />
       <CodeMark code={quote.code} />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="truncate font-medium">{quote.currency.nameFa}</p>
-          <p className="text-[1.05rem] font-semibold">
+          <p className="truncate text-[15px] font-medium leading-tight">
+            {quote.currency.nameFa}
+          </p>
+          <p className="text-[17px] font-semibold leading-none tracking-tight">
             <PriceValue value={quote.price} decimals={quote.currency.decimals} />
           </p>
         </div>
-        <div className="mt-0.5 flex items-center justify-between gap-3 text-xs text-muted">
-          <span>
+        <div className="mt-0.5 flex items-center justify-between gap-3 text-[12px] text-muted">
+          <span className="truncate">
             {quote.code}
             {unit ? ` · ${unit}` : null}
           </span>
           <ChangeBadge quote={quote} />
         </div>
       </div>
+      <StarButton code={quote.code} />
     </Link>
   );
 }
@@ -38,24 +40,25 @@ export function HeroCard({ quote }: { quote: Quote }) {
     <Link
       to="/currencies/$code"
       params={{ code: quote.code.toLowerCase() }}
-      className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-card transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5"
+      className="flex min-w-[148px] flex-col gap-2 rounded-2xl bg-card p-3.5 shadow-card active:opacity-90"
     >
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-xs text-muted">{quote.code}</p>
-          <h2 className="text-base font-medium">{quote.currency.nameFa}</h2>
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium text-muted">{quote.code}</p>
+          <h2 className="truncate text-[14px] font-semibold">
+            {quote.currency.nameFa}
+          </h2>
         </div>
         <StarButton code={quote.code} />
       </div>
-      <p className="text-3xl font-semibold leading-none tracking-tight">
+      <p className="text-[22px] font-semibold leading-none tracking-tight tabular-nums">
         <PriceValue value={quote.price} decimals={quote.currency.decimals} />
-        <span className="ms-2 text-sm font-medium text-muted">تومان</span>
       </p>
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between gap-2 text-[12px]">
         <ChangeBadge quote={quote} />
         {quote.high != null && quote.low != null ? (
-          <span className="text-xs text-muted tabular-nums">
-            {formatToman(quote.low, quote.currency.decimals)} –{" "}
+          <span className="truncate text-muted tabular-nums">
+            {formatToman(quote.low, quote.currency.decimals)}–
             {formatToman(quote.high, quote.currency.decimals)}
           </span>
         ) : null}

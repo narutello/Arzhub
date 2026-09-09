@@ -3,41 +3,38 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f3efe6;
-  --foreground: #1c2430;
-  --card: #fbf8f1;
-  --card-2: #efe9dc;
-  --muted: #5c6570;
-  --subtle: #7a828c;
-  --border: color-mix(in oklab, var(--foreground) 12%, transparent);
-  --border-strong: color-mix(in oklab, var(--foreground) 22%, transparent);
-  --accent: #3d6d86;
-  --accent-fg: #f7f4ec;
-  --up: #2d7a55;
-  --down: #b33d38;
-  --ring: #3d6d86;
-  --shadow-border:
-    0 0 0 1px rgba(28, 36, 48, 0.06),
-    0 1px 2px -1px rgba(28, 36, 48, 0.06),
-    0 2px 8px 0 rgba(28, 36, 48, 0.04);
+  --background: #f2f2f7;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-2: #e5e5ea;
+  --muted: #636366;
+  --subtle: #8e8e93;
+  --border: rgba(60, 60, 67, 0.12);
+  --border-strong: rgba(60, 60, 67, 0.29);
+  --accent: #007aff;
+  --accent-fg: #ffffff;
+  --up: #34c759;
+  --down: #ff3b30;
+  --ring: #007aff;
+  --shadow-border: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04);
   color-scheme: light;
 }
 
 .dark {
-  --background: #0b0c0e;
-  --foreground: #ecece8;
-  --card: #14151a;
-  --card-2: #1b1c22;
-  --muted: #9aa0a8;
-  --subtle: #6f757e;
-  --border: color-mix(in oklab, var(--foreground) 12%, transparent);
-  --border-strong: color-mix(in oklab, var(--foreground) 22%, transparent);
-  --accent: #8aa9bb;
-  --accent-fg: #0b0c0e;
-  --up: #4ea57a;
-  --down: #d26761;
-  --ring: #8aa9bb;
-  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #1c1c1e;
+  --card-2: #2c2c2e;
+  --muted: #98989f;
+  --subtle: #636366;
+  --border: rgba(84, 84, 88, 0.65);
+  --border-strong: rgba(142, 142, 147, 0.5);
+  --accent: #0a84ff;
+  --accent-fg: #ffffff;
+  --up: #30d158;
+  --down: #ff453a;
+  --ring: #0a84ff;
+  --shadow-border: 0 0 0 0.5px rgba(255, 255, 255, 0.08);
   color-scheme: dark;
 }
 
@@ -55,12 +52,13 @@
   --color-up: var(--up);
   --color-down: var(--down);
   --color-ring: var(--ring);
-  --font-sans: "Vazirmatn", "Segoe UI", tahoma, sans-serif;
-  --radius-xs: 4px;
-  --radius-sm: 8px;
+  --font-sans: "Vazirmatn", -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-xl: 22px;
   --shadow-card: var(--shadow-border);
 }
 
@@ -74,7 +72,7 @@
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
-    line-height: 1.5;
+    line-height: 1.4;
   }
 
   button:not(:disabled),
@@ -120,9 +118,9 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    color-mix(in oklab, var(--foreground) 6%, transparent) 0%,
-    color-mix(in oklab, var(--foreground) 12%, transparent) 50%,
-    color-mix(in oklab, var(--foreground) 6%, transparent) 100%
+    color-mix(in oklab, var(--foreground) 5%, transparent) 0%,
+    color-mix(in oklab, var(--foreground) 10%, transparent) 50%,
+    color-mix(in oklab, var(--foreground) 5%, transparent) 100%
   );
   background-size: 200% 100%;
   animation: arz-shimmer 1.4s linear infinite;

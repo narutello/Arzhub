@@ -60,41 +60,47 @@ function Home() {
   }
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">بازار ارز</h1>
-        <p className="text-sm text-muted">
-          قیمت‌های بازار آزاد تهران، به تومان. بدون نرخ رسمی یا تصادفی.
+    <div className="space-y-4">
+      <header className="px-1">
+        <h1 className="text-[28px] font-bold tracking-tight">بازار ارز</h1>
+        <p className="mt-0.5 text-[13px] text-muted">
+          قیمت بازار آزاد تهران · تومان
         </p>
       </header>
+
       {offline ? <OfflineBanner /> : null}
       {stale && error ? <StaleBanner message={error} /> : null}
+
       <MarketStatus snapshot={snapshot} />
       <FeaturedGrid quotes={snapshot.quotes} />
       <Movers quotes={snapshot.quotes} />
 
-      <section className="space-y-3">
-        <div className="flex items-end justify-between gap-3">
-          <h2 className="text-base font-medium">همه ارزها</h2>
-          <span className="text-xs text-subtle">قیمت به تومان</span>
+      <section className="space-y-2">
+        <div className="flex items-end justify-between px-1">
+          <h2 className="text-[13px] font-semibold text-muted">همه ارزها</h2>
+          <span className="text-[11px] text-subtle">قیمت به تومان</span>
         </div>
+
         <label className="relative block">
           <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-subtle" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="جستجوی دلار، یورو، درهم..."
-            className="ps-10"
+            placeholder="جستجو..."
+            className="h-10 rounded-xl border-0 bg-card ps-10 shadow-card"
             aria-label="جستجوی ارز"
           />
         </label>
+
         {filtered.length === 0 ? (
           <EmptySearch query={q} />
         ) : (
-          <div className="divide-y divide-border rounded-xl bg-card px-1 py-1 shadow-card">
-            {filtered.map((quote) => (
-              <CurrencyRow key={quote.code} quote={quote} />
-            ))}
+          <div className="overflow-hidden rounded-2xl bg-card shadow-card">
+            <div className="divide-y divide-border/60">
+              {filtered.map((quote) => (
+                <CurrencyRow key={quote.code} quote={quote} />
+              ))}
+            </div>
           </div>
         )}
       </section>

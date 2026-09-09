@@ -19,15 +19,23 @@ export function PriceValue({
 }
 
 export function ChangeBadge({ quote }: { quote: Quote }) {
-  const tone =
-    quote.direction === "up"
-      ? "text-up"
-      : quote.direction === "down"
-        ? "text-down"
-        : "text-muted";
+  const isUp = quote.direction === "up";
+  const isDown = quote.direction === "down";
+  const tone = isUp ? "text-up" : isDown ? "text-down" : "text-muted";
+  const bg = isUp
+    ? "bg-up/12"
+    : isDown
+      ? "bg-down/12"
+      : "bg-card-2";
+
   return (
-    <span className={cn("inline-flex items-center gap-1 tabular-nums text-sm", tone)}>
-      <span>{formatSigned(quote.change, quote.currency.decimals)}</span>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[12px] font-medium tabular-nums",
+        tone,
+        bg,
+      )}
+    >
       <span dir="ltr">{formatPercent(quote.changePercent)}</span>
     </span>
   );
@@ -55,8 +63,8 @@ export function RangeBar({ quote }: { quote: Quote }) {
 
 export function CodeMark({ code }: { code: string }) {
   return (
-    <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-card-2 text-[0.6875rem] font-semibold tracking-wide text-foreground">
-      {code}
+    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-card-2 text-[11px] font-semibold tracking-wide text-foreground">
+      {code.slice(0, 3)}
     </span>
   );
 }
