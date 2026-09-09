@@ -11,20 +11,20 @@ function rangePct(q: Quote) {
 
 export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
   return (
-    <div className="flex flex-col gap-1 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+    <div className="px-1 text-center text-[12px] leading-relaxed text-muted">
       <p>
         منبع:{" "}
         <a
           href={snapshot.sourceUrl}
-          className="text-foreground underline-offset-4 hover:underline"
+          className="text-accent"
           target="_blank"
           rel="noreferrer"
         >
           {snapshot.sourceName}
         </a>
       </p>
-      <p>
-        آخرین به‌روزرسانی: {formatTehranDate(snapshot.fetchedAt)}،{" "}
+      <p className="mt-0.5">
+        به‌روزرسانی: {formatTehranDate(snapshot.fetchedAt)}،{" "}
         {formatTehranTime(snapshot.fetchedAt)}
       </p>
     </div>
@@ -33,25 +33,23 @@ export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
 
 export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
   return (
-    <div className="rounded-xl bg-card px-4 py-3 shadow-card">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="text-sm font-medium">بازار آزاد تهران</span>
+    <div className="ios-group px-4 py-3">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="text-[15px] font-semibold tracking-tight">بازار آزاد تهران</span>
         <span
           className={
             snapshot.marketOpen
-              ? "rounded-full bg-up/12 px-2 py-0.5 text-xs text-up"
-              : "rounded-full bg-card-2 px-2 py-0.5 text-xs text-muted"
+              ? "rounded-full bg-up/15 px-2 py-0.5 text-[11px] font-semibold text-up"
+              : "rounded-full bg-card-2 px-2 py-0.5 text-[11px] font-semibold text text-muted"
           }
         >
-          {snapshot.marketOpen ? "آخرین نرخ جاری" : "تعطیل / آخرین جلسه"}
+          {snapshot.marketOpen ? "باز" : "بسته"}
         </span>
       </div>
       {snapshot.note ? (
-        <p className="mt-1 text-sm text-muted">{snapshot.note}</p>
+        <p className="mt-1 text-[-[13px] text-muted">{snapshot.note}</p>
       ) : (
-        <p className="mt-1 text-sm text-muted">
-          قیمت‌ها به تومان است. هر تومان برابر ۱۰ ریال.
-        </p>
+        <p className="mt-1 text-[13px] text-muted">قیمت‌ها به تومان · هر تومان = ۱۰ ریال</p>
       )}
     </div>
   );
@@ -67,36 +65,40 @@ function MoverList({
   empty: string;
 }) {
   return (
-    <section className="rounded-xl bg-card p-4 shadow-card">
-      <h2 className="mb-3 text-sm font-medium">{title}</h2>
-      {quotes.length === 0 ? (
-        <p className="text-sm text-muted">{empty}</p>
-      ) : (
-        <ul className="space-y-2">
-          {quotes.map((q) => (
-            <li key={q.code}>
-              <Link
-                to="/currencies/$code"
-                params={{ code: q.code.toLowerCase() }}
-                className="flex items-center gap-3 rounded-md py-1"
-              >
-                <CodeMark code={q.code} />
-                <span className="min-w-0 flex-1 truncate text-sm">
-                  {q.currency.nameFa}
-                </span>
-                <div className="text-end">
-                  <PriceValue
-                    value={q.price}
-                    decimals={q.currency.decimals}
-                    className="block text-sm font-medium"
-                  />
-                  <ChangeBadge quote={q} />
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+    <section>
+      <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-muted">
+        {title}
+      </h2>
+      <div className="ios-group">
+        {quotes.length === 0 ? (
+          <p className="px-4 py-4 text-[14px] text-muted">{empty}</p>
+        ) : (
+          <ul className="divide-y divide-[var(--separator)]">
+            {quotes.map((q) => (
+              <li key={q.code}>
+                <Link
+                  to="/currencies/$code"
+                  params={{ code: q.code.toLowerCase() }}
+                  className="flex items-center gap-3 px-3 py-2.5 active:bg-card-2/60"
+                >
+                  <CodeMark code={q.code} />
+                  <span className="min-w-0 flex-1 truncate text-[15px] font-medium">
+                    {q.currency.nameFa}
+                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <PriceValue
+                      value={q.price}
+                      decimals={q.currency.decimals}
+                      className="text-[15px] font-semibold"
+                    />
+                    <ChangeBadge quote={q} />
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }
@@ -115,41 +117,29 @@ export function Movers({ quotes }: { quotes: Quote[] }) {
     const volatile = [...quotes].sort((a, b) => rangePct(b) - rangePct(a)).slice(0, 4);
     return (
       <MoverList
-        title="بیشترین نوسان روزانه"
+        title="بیشترین نوسان"
         quotes={volatile}
         empty="نوسان معناداری ثبت نشده است."
       />
     );
   }
 
-  const columns = [];
-  if (gainers.length) {
-    columns.push(
-      <MoverList
-        key="up"
-        title="بیشترین افزایش"
-        quotes={gainers}
-        empty="امروز افزایشی ثبت نشده است."
-      />,
-    );
-  }
-  if (losers.length) {
-    columns.push(
-      <MoverList
-        key="down"
-        title="بیشترین کاهش"
-        quotes={losers}
-        empty="امروز کاهشی ثبت نشده است."
-      />,
-    );
-  }
-  return <div className={`grid gap-3 ${columns.length > 1 ? "md:grid-cols-2" : ""}`}>{columns}</div>;
+  return (
+    <div className="grid gap-4">
+      {gainers.length ? (
+        <MoverList title="بیشترین افزایش" quotes={gainers} empty="افزایشی ثبت نشده." />
+      ) : null}
+      {losers.length ? (
+        <MoverList title="بیشترین کاهش" quotes={losers} empty="کاهشی ثبت نشده." />
+      ) : null}
+    </div>
+  );
 }
 
 export function FeaturedGrid({ quotes }: { quotes: Quote[] }) {
   const featured = quotes.filter((q) => q.currency.featured).slice(0, 3);
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
+    <div className="grid gap-2.5 sm:grid-cols-3">
       {featured.map((q) => (
         <HeroCard key={q.code} quote={q} />
       ))}

@@ -60,38 +60,42 @@ function Home() {
   }
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">بازار ارز</h1>
-        <p className="text-sm text-muted">
-          قیمت‌های بازار آزاد تهران، به تومان. بدون نرخ رسمی یا تصادفی.
-        </p>
+    <div className="space-y-5">
+      <header className="px-1 pt-1">
+        <h1 className="text-[28px] font-bold leading-tight tracking-tight">بازار</h1>
+        <p className="mt-0.5 text-[13px] text-muted">قیمت آزاد · به تومان</p>
       </header>
+
       {offline ? <OfflineBanner /> : null}
       {stale && error ? <StaleBanner message={error} /> : null}
+
       <MarketStatus snapshot={snapshot} />
       <FeaturedGrid quotes={snapshot.quotes} />
       <Movers quotes={snapshot.quotes} />
 
-      <section className="space-y-3">
-        <div className="flex items-end justify-between gap-3">
-          <h2 className="text-base font-medium">همه ارزها</h2>
-          <span className="text-xs text-subtle">قیمت به تومان</span>
+      <section className="space-y-2">
+        <div className="flex items-end justify-between gap-3 px-1">
+          <h2 className="text-[13px] font-semibold uppercase tracking-wide text-muted">
+            همه ارزها
+          </h2>
+          <span className="text-[11px] text-subtle">تومان</span>
         </div>
+
         <label className="relative block">
-          <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-subtle" />
+          <Search className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-subtle" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="جستجوی دلار، یورو، درهم..."
-            className="ps-10"
+            placeholder="جستجو"
+            className="h-10 rounded-xl border-0 bg-card-2/80 ps-10 text-[15px] shadow-none focus-visible:ring-1"
             aria-label="جستجوی ارز"
           />
         </label>
+
         {filtered.length === 0 ? (
           <EmptySearch query={q} />
         ) : (
-          <div className="divide-y divide-border rounded-xl bg-card px-1 py-1 shadow-card">
+          <div className="ios-group divide-y divide-[var(--separator)]">
             {filtered.map((quote) => (
               <CurrencyRow key={quote.code} quote={quote} />
             ))}
