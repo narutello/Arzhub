@@ -40,14 +40,14 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
           className={
             snapshot.marketOpen
               ? "rounded-full bg-up/15 px-2 py-0.5 text-[11px] font-semibold text-up"
-              : "rounded-full bg-card-2 px-2 py-0.5 text-[11px] font-semibold text text-muted"
+              : "rounded-full bg-card-2 px-2 py-0.5 text-[11px] font-semibold text-muted"
           }
         >
           {snapshot.marketOpen ? "باز" : "بسته"}
         </span>
       </div>
       {snapshot.note ? (
-        <p className="mt-1 text-[-[13px] text-muted">{snapshot.note}</p>
+        <p className="mt-1 text-[13px] text-muted">{snapshot.note}</p>
       ) : (
         <p className="mt-1 text-[13px] text-muted">قیمت‌ها به تومان · هر تومان = ۱۰ ریال</p>
       )}

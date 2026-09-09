@@ -39,7 +39,7 @@ export function HeroCard({ quote }: { quote: Quote }) {
     <Link
       to="/currencies/$code"
       params={{ code: quote.code.toLowerCase() }}
-      className="flex flex-col gap-2.5 rounded-[14px] bg-card p-3. freestyle shadow-card active:scale-[0.98] transition-transform"
+      className="flex flex-col gap-2.5 rounded-[14px] bg-card p-3.5 shadow-card transition-transform active:scale-[0.98]"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5">
