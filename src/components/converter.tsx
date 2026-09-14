@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import type { Quote } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
-const MAX_DIGITS = 15;
+const MAX_DIGITS = 12; // keep well under Number.MAX_SAFE_INTEGER
 
 /** Convert Persian digits to English and strip everything except digits and one decimal point */
 function sanitizeRaw(value: string): string {
@@ -19,19 +19,15 @@ function sanitizeRaw(value: string): string {
       result += ch;
     } else if (FA_DIGITS.includes(ch)) {
       result += String(FA_DIGITS.indexOf(ch));
-    } else if ((ch === "." || ch === "٫" || ch === ",") && !hasDecimal) {
-      // allow only one decimal separator (٫ or .)
-      if (ch === "." || ch === "٫") {
-        hasDecimal = true;
-        result += ".";
-      }
-      // ignore thousand separators while typing
+    } else if ((ch === "." || ch === "٫") && !hasDecimal) {
+      hasDecimal = true;
+      result += ".";
     }
+    // ignore thousand separators (٬ and ,) while typing
   }
-  // limit total digits (before + after decimal)
   const [intPart = "", decPart = ""] = result.split(".");
   const limitedInt = intPart.slice(0, MAX_DIGITS);
-  const limitedDec = decPart.slice(0, 6);
+  const limitedDec = decPart.slice(0, 4);
   return limitedDec.length > 0 ? `${limitedInt}.${limitedDec}` : limitedInt;
 }
 
@@ -39,10 +35,9 @@ function sanitizeRaw(value: string): string {
 function formatWithSeparators(raw: string): string {
   if (!raw) return "";
   const [intPart = "", decPart] = raw.split(".");
-  // add thousand separators from the right
   const withSep = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "٬");
   const faInt = toFaDigits(withSep);
-  if (decPart !== undefined) {
+  if (decPart !== undefined && decPart.length > 0) {
     return `${faInt}٫${toFaDigits(decPart)}`;
   }
   return faInt;
@@ -97,7 +92,7 @@ export function Converter({
     (c) => c.code === "IRT" || byCode[c.code],
   );
 
-  function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleAmountChange(e: ChangeEvent<HTMLInputElement>) {
     const cleaned = sanitizeRaw(e.target.value);
     setAmount(formatWithSeparators(cleaned));
   }
@@ -108,19 +103,19 @@ export function Converter({
   }
 
   return (
-    <div className="rounded-xl bg-card p-4 shadow-card">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-base font-medium">تبدیل ارز</h2>
-        <p className="text-xs text-muted">مبنای محاسبه: تومان</p>
+    <div className="rounded-xl bg-card p-4 shadow-card min-w-0 overflow-hidden">
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h2 className="text-base font-medium shrink-0">تبدیل ارز</h2>
+        <p className="text-xs text-muted shrink-0">مبنای محاسبه: تومان</p>
       </div>
-      <div className="grid gap-3">
+      <div className="grid gap-3 min-w-0">
         <label className="grid gap-1.5 min-w-0">
           <span className="text-xs text-muted">مقدار</span>
           <Input
             inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
-            className="tabular-nums min-w-0 overflow-hidden text-ellipsis"
+            className="tabular-nums min-w-0 w-full overflow-hidden text-ellipsis"
           />
         </label>
         <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2 min-w-0">
@@ -136,6 +131,7 @@ export function Converter({
             size="icon"
             aria-label="جابه‌جایی"
             onClick={swap}
+            className="shrink-0"
           >
             <ArrowLeftRight className="size-4" />
           </Button>
@@ -154,7 +150,7 @@ export function Converter({
               <p className="text-xs text-muted break-words">
                 {amount || "۰"} {fromCur.nameFa} برابر است با
               </p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight break-all">
+              <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight break-all leading-snug">
                 {toCur.code === "IRT"
                   ? formatToman(result, 0)
                   : formatNumber(result, result >= 100 ? 2 : 4)}{" "}
