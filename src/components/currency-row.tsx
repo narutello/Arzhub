@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ChangeBadge, CodeMark, PriceValue } from "@/components/price";
+import { ChangeBadge, PriceValue } from "@/components/price";
+import { Flag } from "@/components/flag";
 import { StarButton } from "@/components/star-button";
 import type { Quote } from "@/lib/types";
 import { formatToman } from "@/lib/format";
@@ -13,9 +14,7 @@ export function CurrencyRow({ quote }: { quote: Quote }) {
       className="flex min-h-16 items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 hover:bg-card"
     >
       <StarButton code={quote.code} />
-      <span className="text-xl leading-none shrink-0" aria-hidden>
-        {quote.currency.flag}
-      </span>
+      <Flag code={quote.code} emoji={quote.currency.flag} size="md" />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-3">
           <p className="truncate font-medium">{quote.currency.nameFa}</p>
@@ -44,9 +43,7 @@ export function HeroCard({ quote }: { quote: Quote }) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-2xl leading-none shrink-0" aria-hidden>
-            {quote.currency.flag}
-          </span>
+          <Flag code={quote.code} emoji={quote.currency.flag} size="lg" />
           <div className="min-w-0">
             <p className="text-xs text-muted">{quote.code}</p>
             <h2 className="text-base font-medium truncate">{quote.currency.nameFa}</h2>
