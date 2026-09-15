@@ -18,3 +18,8 @@ updates:
         dependency-type: "production"
       development-dependencies:
         dependency-type: "development"
+    ignore:
+      # typescript-eslint@8.x still only supports TypeScript < 6.1
+      # Keep TS on 5.x until official support for 6/7 arrives
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
