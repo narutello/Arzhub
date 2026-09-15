@@ -165,14 +165,14 @@ export function Converter({
           ) : (
             <>
               <p className="text-xs text-muted break-words">
-                {amount || "۰"} {fromCur.nameFa} برابر است با
+                {amount || "۰"} {fromCur.flag} {fromCur.nameFa} برابر است با
               </p>
               <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight break-all leading-snug">
                 {toCur.code === "IRT"
                   ? formatToman(result, 0)
                   : formatNumber(result, result >= 100 ? 2 : 4)}{" "}
                 <span className="text-base font-medium text-muted">
-                  {toCur.nameFa}
+                  {toCur.flag} {toCur.nameFa}
                 </span>
               </p>
               {persianWords && (
@@ -211,7 +211,7 @@ function CurrencySelect({
       >
         {options.map((c) => (
           <option key={c.code} value={c.code}>
-            {c.code} — {c.nameFa}
+            {c.flag} {c.code} — {c.nameFa}
           </option>
         ))}
       </select>
