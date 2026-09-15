@@ -13,7 +13,9 @@ export function CurrencyRow({ quote }: { quote: Quote }) {
       className="flex min-h-16 items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 hover:bg-card"
     >
       <StarButton code={quote.code} />
-      <CodeMark code={quote.code} />
+      <span className="text-xl leading-none shrink-0" aria-hidden>
+        {quote.currency.flag}
+      </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-3">
           <p className="truncate font-medium">{quote.currency.nameFa}</p>
@@ -41,9 +43,14 @@ export function HeroCard({ quote }: { quote: Quote }) {
       className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-card transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5"
     >
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-xs text-muted">{quote.code}</p>
-          <h2 className="text-base font-medium">{quote.currency.nameFa}</h2>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-2xl leading-none shrink-0" aria-hidden>
+            {quote.currency.flag}
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs text-muted">{quote.code}</p>
+            <h2 className="text-base font-medium truncate">{quote.currency.nameFa}</h2>
+          </div>
         </div>
         <StarButton code={quote.code} />
       </div>
