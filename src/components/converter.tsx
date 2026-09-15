@@ -3,7 +3,6 @@ import { ArrowLeftRight } from "lucide-react";
 import { numberToWords } from "@persian-tools/persian-tools";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Flag, flagText } from "@/components/flag";
 import { CONVERTIBLE, type Currency } from "@/lib/currencies";
 import { formatNumber, formatToman, toFaDigits } from "@/lib/format";
 import type { Quote } from "@/lib/types";
@@ -162,20 +161,15 @@ export function Converter({
             <p className="text-sm text-muted">برای این جفت‌ارز نرخی در دسترس نیست.</p>
           ) : (
             <>
-              <p className="text-xs text-muted break-words flex items-center gap-1 flex-wrap">
-                <span>{amount || "۰"}</span>
-                <Flag code={fromCur.code} emoji={fromCur.flag} size="sm" />
-                <span>{fromCur.nameFa} برابر است با</span>
+              <p className="text-xs text-muted break-words">
+                {amount || "۰"} {fromCur.flag} {fromCur.nameFa} برابر است با
               </p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight break-all leading-snug flex items-center gap-1.5 flex-wrap">
-                <span>
-                  {toCur.code === "IRT"
-                    ? formatToman(result, 0)
-                    : formatNumber(result, result >= 100 ? 2 : 4)}
-                </span>
-                <span className="text-base font-medium text-muted inline-flex items-center gap-1">
-                  <Flag code={toCur.code} emoji={toCur.flag} size="sm" />
-                  {toCur.nameFa}
+              <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight break-all leading-snug">
+                {toCur.code === "IRT"
+                  ? formatToman(result, 0)
+                  : formatNumber(result, result >= 100 ? 2 : 4)}{" "}
+                <span className="text-base font-medium text-muted">
+                  {toCur.flag} {toCur.nameFa}
                 </span>
               </p>
               {persianWords && (
@@ -214,7 +208,7 @@ function CurrencySelect({
       >
         {options.map((c) => (
           <option key={c.code} value={c.code}>
-            {flagText(c.code, c.flag)} {c.code} — {c.nameFa}
+            {c.flag} {c.code} — {c.nameFa}
           </option>
         ))}
       </select>
