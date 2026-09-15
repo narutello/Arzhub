@@ -95,6 +95,17 @@
   * {
     border-color: var(--border);
   }
+
+  /* Kill focus outline + tap highlight on chart SVGs (mobile browsers add thick black border) */
+  .recharts-wrapper,
+  .recharts-wrapper *,
+  .recharts-surface,
+  .recharts-surface:focus,
+  .recharts-surface:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
