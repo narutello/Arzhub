@@ -1,5 +1,6 @@
 import { useMemo, useState, type ChangeEvent } from "react";
 import { ArrowLeftRight } from "lucide-react";
+import { numberToWords } from "@persian-tools/persian-tools";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CONVERTIBLE, type Currency } from "@/lib/currencies";
@@ -49,6 +50,20 @@ function unitPrice(quote: Quote | undefined, currency: Currency): number | null 
   return quote.price / currency.quoteUnit;
 }
 
+/** Convert a number to Persian words safely (only integer part for large amounts) */
+function toPersianWords(value: number): string | null {
+  if (!Number.isFinite(value)) return null;
+  try {
+    // numberToWords works best with safe integers; for display we use Math.round
+    const intValue = Math.round(value);
+    if (!Number.isSafeInteger(intValue)) return null;
+    const words = numberToWords(intValue);
+    return typeof words === "string" ? words : null;
+  } catch {
+    return null;
+  }
+}
+
 export function Converter({
   quotes,
   defaultFrom = "USD",
@@ -87,6 +102,8 @@ export function Converter({
     const toman = numeric * fromPrice;
     result = toman / toPrice;
   }
+
+  const persianWords = result != null ? toPersianWords(result) : null;
 
   const fromOptions = CONVERTIBLE.filter(
     (c) => c.code === "IRT" || byCode[c.code],
@@ -158,6 +175,11 @@ export function Converter({
                   {toCur.nameFa}
                 </span>
               </p>
+              {persianWords && (
+                <p className="mt-2 text-sm text-muted leading-relaxed">
+                  {persianWords} {toCur.nameFa}
+                </p>
+              )}
             </>
           )}
         </div>
