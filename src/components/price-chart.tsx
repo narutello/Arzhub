@@ -96,13 +96,21 @@ export function PriceChart({
       ) : (
         <div
           dir="ltr"
-          className="h-64 w-full sm:h-72 outline-none focus:outline-none [&_svg]:outline-none [&_svg]:focus:outline-none"
+          className="h-64 w-full sm:h-72 select-none"
+          style={{
+            outline: "none",
+            WebkitTapHighlightColor: "transparent",
+            WebkitUserSelect: "none",
+            userSelect: "none",
+          }}
           tabIndex={-1}
+          onMouseDown={(e) => e.preventDefault()}
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={points}
               margin={{ top: 10, right: 4, left: 0, bottom: 4 }}
+              style={{ outline: "none" }}
             >
               <defs>
                 <linearGradient id={`arzFill-${quote.code}`} x1="0" y1="0" x2="0" y2="1">
