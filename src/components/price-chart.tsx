@@ -94,7 +94,11 @@ export function PriceChart({
           </p>
         </div>
       ) : (
-        <div dir="ltr" className="h-64 w-full sm:h-72">
+        <div
+          dir="ltr"
+          className="h-64 w-full sm:h-72 outline-none focus:outline-none [&_svg]:outline-none [&_svg]:focus:outline-none"
+          tabIndex={-1}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={points}
