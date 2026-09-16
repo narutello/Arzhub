@@ -23,14 +23,15 @@ export function formatSigned(value: number, decimals = 0): string {
   return sign + formatNumber(Math.abs(value), decimals);
 }
 
+/** e.g. +۰٫۲۶٪  /  −۱٫۵۰٪  /  ۰٪ */
 export function formatPercent(value: number): string {
   if (!Number.isFinite(value)) return "—";
   const abs = Math.abs(value);
   const decimals = abs >= 10 ? 1 : 2;
   const body = formatNumber(abs, decimals);
-  if (value > 0) return `٪${body}+`;
-  if (value < 0) return `٪${body}−`;
-  return `٪${body}`;
+  if (value > 0) return `+${body}٪`;
+  if (value < 0) return `−${body}٪`;
+  return `${body}٪`;
 }
 
 const tehranDate = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
