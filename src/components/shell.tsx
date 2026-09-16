@@ -69,16 +69,16 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 md:pb-12">{children}</main>
+      <main className="mx-auto w-full max-w-5xl px-4 pb-20 pt-6 md:pb-8">{children}</main>
 
-      <footer className="mx-auto w-full max-w-5xl px-4 pb-28 pt-2 md:pb-8">
-        <div className="flex items-center justify-center border-t border-border pt-4">
+      <footer className="mx-auto w-full max-w-5xl px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-5">
+        <div className="flex items-center justify-center border-t border-border py-2.5">
           <a
             href="https://github.com/narutello/Arzhub"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
-            className="inline-flex items-center justify-center rounded-md p-2 text-subtle transition-colors hover:text-foreground"
+            className="inline-flex items-center justify-center rounded-md p-1 text-subtle transition-colors hover:text-foreground"
           >
             <GitHubIcon className="size-4" />
           </a>
