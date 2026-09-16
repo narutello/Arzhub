@@ -130,11 +130,11 @@ function CurrencyDetail() {
             tone={quote.direction}
           />
           <Stat
-            label="بالای روز"
+            label="سقف امروز"
             value={quote.high != null ? formatToman(quote.high, currency.decimals) : "—"}
           />
           <Stat
-            label="پایین روز"
+            label="کف امروز"
             value={quote.low != null ? formatToman(quote.low, currency.decimals) : "—"}
           />
         </dl>
