@@ -58,11 +58,13 @@ export function HeroCard({ quote }: { quote: Quote }) {
         <PriceValue value={quote.price} decimals={quote.currency.decimals} />
         <span className="ms-2 text-sm font-medium text-muted">تومان</span>
       </p>
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between gap-3 text-sm">
         <ChangeBadge quote={quote} />
         {quote.high != null && quote.low != null ? (
-          <span className="text-xs text-muted tabular-nums">
-            {formatToman(quote.low, quote.currency.decimals)} –{" "}
+          <span className="text-xs text-muted tabular-nums shrink-0">
+            <span className="opacity-70">بازه </span>
+            {formatToman(quote.low, quote.currency.decimals)}
+            <span className="mx-0.5 opacity-50">–</span>
             {formatToman(quote.high, quote.currency.decimals)}
           </span>
         ) : null}
