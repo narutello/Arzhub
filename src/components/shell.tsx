@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeftRight, Home, LineChart, Star } from "lucide-react";
+import { ArrowLeftRight, Github, Home, LineChart, Star } from "lucide-react";
 import { ThemeToggle } from "@/components/theme";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +50,20 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-6 md:pb-12">{children}</main>
+
+      <footer className="mx-auto w-full max-w-5xl px-4 pb-28 pt-2 md:pb-8">
+        <div className="flex items-center justify-center border-t border-border pt-4">
+          <a
+            href="https://github.com/narutello/Arzhub"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-subtle transition-colors hover:text-foreground"
+          >
+            <Github className="size-3.5" />
+            <span>سورس روی GitHub</span>
+          </a>
+        </div>
+      </footer>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden">
         <ul className="grid grid-cols-4">
