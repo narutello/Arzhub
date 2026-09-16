@@ -39,9 +39,13 @@ export const Route = createRootRoute({
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
+      { rel: "apple-touch-icon", href: "/favicon.svg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap",
@@ -78,9 +82,12 @@ function RootComponent() {
 function NotFound() {
   return (
     <div className="rounded-xl bg-card px-6 py-16 text-center shadow-card">
-      <h1 className="text-lg font-semibold">صفحه پیدا نشد</h1>
-      <p className="mt-2 text-sm text-muted">این مسیر در ارزهاب وجود ندارد.</p>
-      <Link to="/" className="mt-4 inline-block text-sm text-accent hover:underline">
+      <h1 className="text-xl font-semibold">صفحه پیدا نشد</h1>
+      <p className="mt-2 text-sm text-muted">این مسیر وجود ندارد یا منتقل شده است.</p>
+      <Link
+        to="/"
+        className="mt-6 inline-flex rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background"
+      >
         بازگشت به خانه
       </Link>
     </div>
