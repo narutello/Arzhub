@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#0b0c0e"/>
-  <path d="M7 21.5 L12 14.5 L16.5 18 L25 9.5" stroke="#8aa9bb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="25" cy="9.5" r="1.6" fill="#ecece8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Rounded tile — matches app dark chrome -->
+  <rect width="512" height="512" rx="112" fill="#0b0c0e"/>
+  <!-- Chart stroke (safe zone: glyph stays inside ~70% center for maskable) -->
+  <path
+    d="M120 340 L200 228 L280 292 L392 160"
+    stroke="#8aa9bb"
+    stroke-width="36"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- Endpoint -->
+  <circle cx="392" cy="160" r="28" fill="#ecece8"/>
 </svg>
