@@ -25,10 +25,19 @@ export function ChangeBadge({ quote }: { quote: Quote }) {
       : quote.direction === "down"
         ? "text-down"
         : "text-muted";
+
   return (
-    <span className={cn("inline-flex items-center gap-1 tabular-nums text-sm", tone)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 tabular-nums text-sm font-medium",
+        tone,
+      )}
+      dir="ltr"
+    >
       <span>{formatSigned(quote.change, quote.currency.decimals)}</span>
-      <span dir="ltr">{formatPercent(quote.changePercent)}</span>
+      <span className="text-[0.7rem] opacity-80">
+        ({formatPercent(quote.changePercent)})
+      </span>
     </span>
   );
 }
