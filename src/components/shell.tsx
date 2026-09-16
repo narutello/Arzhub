@@ -37,13 +37,13 @@ export function Shell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-5">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-1.5">
               <img
                 src="/favicon.svg"
                 alt=""
-                width={28}
-                height={28}
-                className="size-7 rounded-md"
+                width={20}
+                height={20}
+                className="size-5 shrink-0 rounded-[5px]"
               />
               <span className="text-lg font-semibold tracking-tight">ارزهاب</span>
               <span className="hidden text-xs text-subtle sm:inline">بازار آزاد</span>
