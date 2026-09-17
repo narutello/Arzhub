@@ -83,7 +83,6 @@ function buildSharePath(from: string, to: string, amount: string): string {
   return `/convert?${params.toString()}`;
 }
 
-/** Read query string directly — reliable on first paint / hard navigation */
 function readUrlDefaults(): {
   from?: string;
   to?: string;
@@ -92,10 +91,11 @@ function readUrlDefaults(): {
   if (typeof window === "undefined") return {};
   if (window.location.pathname !== "/convert") return {};
   const p = new URLSearchParams(window.location.search);
-  const from = p.get("from") ?? undefined;
-  const to = p.get("to") ?? undefined;
-  const amount = p.get("amount") ?? undefined;
-  return { from, to, amount };
+  return {
+    from: p.get("from") ?? undefined,
+    to: p.get("to") ?? undefined,
+    amount: p.get("amount") ?? undefined,
+  };
 }
 
 export function Converter({
@@ -103,7 +103,6 @@ export function Converter({
   defaultFrom = "USD",
   defaultTo = "IRT",
   defaultAmount,
-  /** When true, keep the address bar in sync (only use on /convert page). */
   syncUrl = false,
 }: {
   quotes: Quote[];
@@ -124,10 +123,14 @@ export function Converter({
   const [amount, setAmount] = useState(initialAmount);
   const [copied, setCopied] = useState(false);
   const readyToSync = useRef(false);
+  const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Allow URL sync only after first paint so we never overwrite shared params
   useEffect(() => {
-    readyToSync.current = true;
+    // next tick — avoid racing first paint / shared-link seed
+    const t = window.setTimeout(() => {
+      readyToSync.current = true;
+    }, 0);
+    return () => window.clearTimeout(t);
   }, []);
 
   const byCode = useMemo(
@@ -160,14 +163,24 @@ export function Converter({
     (c) => c.code === "IRT" || byCode[c.code],
   );
 
+  // Debounced URL sync — never remount; just update the address bar quietly
   useEffect(() => {
-    if (!syncUrl || !readyToSync.current || typeof window === "undefined") return;
+    if (!syncUrl || typeof window === "undefined") return;
     if (window.location.pathname !== "/convert") return;
-    const next = buildSharePath(from, to, amount);
-    const current = `${window.location.pathname}${window.location.search}`;
-    if (current !== next) {
-      window.history.replaceState(null, "", next);
-    }
+
+    if (syncTimer.current) clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(() => {
+      if (!readyToSync.current) return;
+      const next = buildSharePath(from, to, amount);
+      const current = `${window.location.pathname}${window.location.search}`;
+      if (current !== next) {
+        window.history.replaceState(null, "", next);
+      }
+    }, 300);
+
+    return () => {
+      if (syncTimer.current) clearTimeout(syncTimer.current);
+    };
   }, [syncUrl, from, to, amount]);
 
   function handleAmountChange(e: ChangeEvent<HTMLInputElement>) {
@@ -194,7 +207,7 @@ export function Converter({
         return;
       }
     } catch {
-      // cancelled or failed
+      // cancelled
     }
 
     try {
