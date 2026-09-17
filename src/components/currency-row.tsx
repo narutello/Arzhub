@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ChangeBadge, PriceValue } from "@/components/price";
+import { CopyPriceButton } from "@/components/copy-price-button";
 import { StarButton } from "@/components/star-button";
 import type { Quote } from "@/lib/types";
 import { formatToman } from "@/lib/format";
@@ -19,9 +20,12 @@ export function CurrencyRow({ quote }: { quote: Quote }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-3">
           <p className="truncate font-medium">{quote.currency.nameFa}</p>
-          <p className="text-[1.05rem] font-semibold">
-            <PriceValue value={quote.price} decimals={quote.currency.decimals} />
-          </p>
+          <div className="flex items-center gap-0.5">
+            <p className="text-[1.05rem] font-semibold">
+              <PriceValue value={quote.price} decimals={quote.currency.decimals} />
+            </p>
+            <CopyPriceButton quote={quote} />
+          </div>
         </div>
         <div className="mt-0.5 flex items-center justify-between gap-3 text-xs text-muted">
           <span>
@@ -52,7 +56,10 @@ export function HeroCard({ quote }: { quote: Quote }) {
             <h2 className="text-base font-medium truncate">{quote.currency.nameFa}</h2>
           </div>
         </div>
-        <StarButton code={quote.code} />
+        <div className="flex items-center gap-0.5">
+          <CopyPriceButton quote={quote} />
+          <StarButton code={quote.code} />
+        </div>
       </div>
       <p className="text-3xl font-semibold leading-none tracking-tight">
         <PriceValue value={quote.price} decimals={quote.currency.decimals} />
