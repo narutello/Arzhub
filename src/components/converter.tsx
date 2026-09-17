@@ -1,5 +1,5 @@
-import { useMemo, useState, type ChangeEvent } from "react";
-import { ArrowLeftRight } from "lucide-react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { ArrowLeftRight, Check, Link2 } from "lucide-react";
 import { numberToWords } from "@persian-tools/persian-tools";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +9,8 @@ import type { Quote } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
-const MAX_DIGITS = 12; // keep well under Number.MAX_SAFE_INTEGER
+const MAX_DIGITS = 12;
 
-/** Convert Persian digits to English and strip everything except digits and one decimal point */
 function sanitizeRaw(value: string): string {
   let hasDecimal = false;
   let result = "";
@@ -24,7 +23,6 @@ function sanitizeRaw(value: string): string {
       hasDecimal = true;
       result += ".";
     }
-    // ignore thousand separators (٬ and ,) while typing
   }
   const [intPart = "", decPart = ""] = result.split(".");
   const limitedInt = intPart.slice(0, MAX_DIGITS);
@@ -32,7 +30,6 @@ function sanitizeRaw(value: string): string {
   return limitedDec.length > 0 ? `${limitedInt}.${limitedDec}` : limitedInt;
 }
 
-/** Format a clean numeric string with Persian thousand separators (٬) */
 function formatWithSeparators(raw: string): string {
   if (!raw) return "";
   const [intPart = "", decPart] = raw.split(".");
@@ -50,7 +47,6 @@ function unitPrice(quote: Quote | undefined, currency: Currency): number | null 
   return quote.price / currency.quoteUnit;
 }
 
-/** Convert a number to Persian words safely (only integer part for large amounts) */
 function toPersianWords(value: number): string | null {
   if (!Number.isFinite(value)) return null;
   try {
@@ -63,18 +59,33 @@ function toPersianWords(value: number): string | null {
   }
 }
 
+function resolveCode(code: string | undefined, fallback: string): string {
+  if (!code) return fallback;
+  const upper = code.toUpperCase();
+  return CONVERTIBLE.some((c) => c.code === upper) ? upper : fallback;
+}
+
+function amountFromParam(raw: string | undefined): string {
+  if (!raw) return "۱";
+  const cleaned = sanitizeRaw(raw);
+  return cleaned ? formatWithSeparators(cleaned) : "۱";
+}
+
 export function Converter({
   quotes,
   defaultFrom = "USD",
   defaultTo = "IRT",
+  defaultAmount,
 }: {
   quotes: Quote[];
   defaultFrom?: string;
   defaultTo?: string;
+  defaultAmount?: string;
 }) {
-  const [from, setFrom] = useState(defaultFrom);
-  const [to, setTo] = useState(defaultTo);
-  const [amount, setAmount] = useState("۱");
+  const [from, setFrom] = useState(() => resolveCode(defaultFrom, "USD"));
+  const [to, setTo] = useState(() => resolveCode(defaultTo, "IRT"));
+  const [amount, setAmount] = useState(() => amountFromParam(defaultAmount));
+  const [copied, setCopied] = useState(false);
 
   const byCode = useMemo(
     () => Object.fromEntries(quotes.map((q) => [q.code, q])),
@@ -106,6 +117,24 @@ export function Converter({
     (c) => c.code === "IRT" || byCode[c.code],
   );
 
+  // keep URL in sync so the address bar is always shareable
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const rawAmount = amount
+      .replace(/٬/g, "")
+      .replace(/٫/g, ".")
+      .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)));
+    const params = new URLSearchParams();
+    params.set("from", from);
+    params.set("to", to);
+    if (rawAmount) params.set("amount", rawAmount);
+    const next = `/convert?${params.toString()}`;
+    const current = `${window.location.pathname}${window.location.search}`;
+    if (current !== next) {
+      window.history.replaceState(null, "", next);
+    }
+  }, [from, to, amount]);
+
   function handleAmountChange(e: ChangeEvent<HTMLInputElement>) {
     const cleaned = sanitizeRaw(e.target.value);
     setAmount(formatWithSeparators(cleaned));
@@ -116,11 +145,69 @@ export function Converter({
     setTo(from);
   }
 
+  async function shareLink() {
+    const rawAmount = amount
+      .replace(/٬/g, "")
+      .replace(/٫/g, ".")
+      .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)));
+    const params = new URLSearchParams({
+      from,
+      to,
+      ...(rawAmount ? { amount: rawAmount } : {}),
+    });
+    const url = `${window.location.origin}/convert?${params.toString()}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "تبدیل ارز | ارزهاب",
+          text: `${amount || "۰"} ${fromCur.nameFa} → ${toCur.nameFa}`,
+          url,
+        });
+        return;
+      }
+    } catch {
+      // user cancelled or share failed — fall through to clipboard
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <div className="rounded-xl bg-card p-4 shadow-card min-w-0 overflow-hidden">
       <div className="mb-4 flex items-center justify-between gap-2">
         <h2 className="text-base font-medium shrink-0">تبدیل ارز</h2>
-        <p className="text-xs text-muted shrink-0">مبنای محاسبه: تومان</p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs text-muted hidden sm:inline shrink-0">
+            مبنای محاسبه: تومان
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void shareLink()}
+            className="h-8 gap-1.5 px-2.5 text-xs"
+            aria-label="اشتراک لینک تبدیل"
+          >
+            {copied ? (
+              <>
+                <Check className="size-3.5" />
+                کپی شد
+              </>
+            ) : (
+              <>
+                <Link2 className="size-3.5" />
+                اشتراک
+              </>
+            )}
+          </Button>
+        </div>
       </div>
       <div className="grid gap-3 min-w-0">
         <label className="grid gap-1.5 min-w-0">
@@ -158,7 +245,9 @@ export function Converter({
         </div>
         <div className="rounded-lg bg-card-2 px-4 py-4 min-w-0 overflow-hidden">
           {result == null ? (
-            <p className="text-sm text-muted">برای این جفت‌ارز نرخی در دسترس نیست.</p>
+            <p className="text-sm text-muted">
+              برای این جفت‌ارز نرخی در دسترس نیست.
+            </p>
           ) : (
             <>
               <p className="text-xs text-muted break-words">
