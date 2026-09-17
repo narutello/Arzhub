@@ -54,6 +54,16 @@ const tehranShort = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
   month: "short",
 });
 
+/** Compact date+time for share text: «۱۷ شهریور ۱۴۰۵ — ۱۴:۳۰» */
+const tehranShareLine = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+  timeZone: "Asia/Tehran",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 export function formatTehranDate(iso: string | number | Date): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
@@ -76,4 +86,33 @@ export function formatChartTick(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   return tehranShort.format(d);
+}
+
+/**
+ * Shareable price text (format 4):
+ * دلار آمریکا: ۱۱۵٬۴۲۰ تومان
+ * ۱۷ شهریور ۱۴۰۵، ۱۴:۳۰
+ */
+export function formatPriceShare({
+  nameFa,
+  price,
+  decimals = 0,
+  updatedAt,
+  unitLabel = "تومان",
+}: {
+  nameFa: string;
+  price: number;
+  decimals?: number;
+  updatedAt?: string | number | Date | null;
+  unitLabel?: string;
+}): string {
+  const priceLine = `${nameFa}: ${formatToman(price, decimals)} ${unitLabel}`;
+  const when = updatedAt != null ? new Date(updatedAt) : new Date();
+  if (Number.isNaN(when.getTime())) return priceLine;
+  // Intl often uses «،» between date and time — normalize to em dash style
+  const stamped = tehranShareLine
+    .format(when)
+    .replace(/،\s*/g, " — ")
+    .replace(/,/g, " —");
+  return `${priceLine}\n${stamped}`;
 }
