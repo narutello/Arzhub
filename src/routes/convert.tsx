@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
 import { getRates } from "@/lib/market";
 import { useMarket } from "@/lib/use-market";
 import { Converter } from "@/components/converter";
@@ -11,14 +10,18 @@ import {
   StaleBanner,
 } from "@/components/states";
 
-const convertSearchSchema = z.object({
-  from: z.string().optional(),
-  to: z.string().optional(),
-  amount: z.string().optional(),
-});
+type ConvertSearch = {
+  from?: string;
+  to?: string;
+  amount?: string;
+};
 
 export const Route = createFileRoute("/convert")({
-  validateSearch: convertSearchSchema,
+  validateSearch: (search: Record<string, unknown>): ConvertSearch => ({
+    from: typeof search.from === "string" ? search.from : undefined,
+    to: typeof search.to === "string" ? search.to : undefined,
+    amount: typeof search.amount === "string" ? search.amount : undefined,
+  }),
   loader: () => getRates(),
   head: () => ({
     meta: [
