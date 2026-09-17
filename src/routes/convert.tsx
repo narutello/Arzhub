@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { getRates } from "@/lib/market";
 import { useMarket } from "@/lib/use-market";
 import { Converter } from "@/components/converter";
@@ -10,14 +11,22 @@ import {
   StaleBanner,
 } from "@/components/states";
 
+const convertSearchSchema = z.object({
+  from: z.string().optional(),
+  to: z.string().optional(),
+  amount: z.string().optional(),
+});
+
 export const Route = createFileRoute("/convert")({
+  validateSearch: convertSearchSchema,
   loader: () => getRates(),
   head: () => ({
     meta: [
       { title: "تبدیل ارز | ارزهاب" },
       {
         name: "description",
-        content: "تبدیل دلار، یورو، درهم و سایر ارزها به تومان بر اساس نرخ بازار آزاد تهران.",
+        content:
+          "تبدیل دلار، یورو، درهم و سایر ارزها به تومان بر اساس نرخ بازار آزاد تهران.",
       },
     ],
   }),
@@ -26,7 +35,9 @@ export const Route = createFileRoute("/convert")({
 
 function ConvertPage() {
   const initial = Route.useLoaderData();
-  const { snapshot, error, stale, offline, isLoading, refetch } = useMarket(initial);
+  const search = Route.useSearch();
+  const { snapshot, error, stale, offline, isLoading, refetch } =
+    useMarket(initial);
 
   if (isLoading) return <LoadingBoard />;
   if (!snapshot) {
@@ -50,7 +61,12 @@ function ConvertPage() {
       </header>
       {offline ? <OfflineBanner /> : null}
       {stale && error ? <StaleBanner message={error} /> : null}
-      <Converter quotes={snapshot.quotes} />
+      <Converter
+        quotes={snapshot.quotes}
+        defaultFrom={search.from?.toUpperCase()}
+        defaultTo={search.to?.toUpperCase()}
+        defaultAmount={search.amount}
+      />
       <SourceBar snapshot={snapshot} />
     </div>
   );
