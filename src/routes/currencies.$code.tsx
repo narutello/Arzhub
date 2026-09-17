@@ -3,6 +3,7 @@ import { getChart, getRates } from "@/lib/market";
 import { CURRENCY_BY_CODE } from "@/lib/currencies";
 import { useMarket } from "@/lib/use-market";
 import { ChangeBadge, CodeMark, PriceValue } from "@/components/price";
+import { CopyPriceButton } from "@/components/copy-price-button";
 import { Converter } from "@/components/converter";
 import { PriceChart } from "@/components/price-chart";
 import { StarButton } from "@/components/star-button";
@@ -107,14 +108,20 @@ function CurrencyDetail() {
             </p>
           </div>
         </div>
-        <StarButton code={quote.code} />
+        <div className="flex items-center gap-0.5">
+          <CopyPriceButton quote={quote} size="md" />
+          <StarButton code={quote.code} />
+        </div>
       </header>
 
       <section className="rounded-xl bg-card p-5 shadow-card">
         <p className="text-xs text-muted">قیمت فعلی (تومان)</p>
-        <p className="mt-1 text-4xl font-semibold tracking-tight">
-          <PriceValue value={quote.price} decimals={currency.decimals} />
-        </p>
+        <div className="mt-1 flex items-center gap-2">
+          <p className="text-4xl font-semibold tracking-tight">
+            <PriceValue value={quote.price} decimals={currency.decimals} />
+          </p>
+          <CopyPriceButton quote={quote} size="md" />
+        </div>
         <div className="mt-3">
           <ChangeBadge quote={quote} />
         </div>
