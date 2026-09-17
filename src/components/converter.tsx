@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { ArrowLeftRight, Check, Link2 } from "lucide-react";
 import { numberToWords } from "@persian-tools/persian-tools";
 import { Button } from "@/components/ui/button";
@@ -65,9 +65,9 @@ function resolveCode(code: string | undefined, fallback: string): string {
   return CONVERTIBLE.some((c) => c.code === upper) ? upper : fallback;
 }
 
-function amountFromParam(raw: string | undefined): string {
-  if (!raw) return "۱";
-  const cleaned = sanitizeRaw(raw);
+function amountFromParam(raw: string | undefined | null): string {
+  if (raw == null || raw === "") return "۱";
+  const cleaned = sanitizeRaw(String(raw));
   return cleaned ? formatWithSeparators(cleaned) : "۱";
 }
 
@@ -81,6 +81,21 @@ function buildSharePath(from: string, to: string, amount: string): string {
   params.set("to", to);
   if (rawAmount) params.set("amount", rawAmount);
   return `/convert?${params.toString()}`;
+}
+
+/** Read query string directly — reliable on first paint / hard navigation */
+function readUrlDefaults(): {
+  from?: string;
+  to?: string;
+  amount?: string;
+} {
+  if (typeof window === "undefined") return {};
+  if (window.location.pathname !== "/convert") return {};
+  const p = new URLSearchParams(window.location.search);
+  const from = p.get("from") ?? undefined;
+  const to = p.get("to") ?? undefined;
+  const amount = p.get("amount") ?? undefined;
+  return { from, to, amount };
 }
 
 export function Converter({
@@ -97,10 +112,23 @@ export function Converter({
   defaultAmount?: string;
   syncUrl?: boolean;
 }) {
-  const [from, setFrom] = useState(() => resolveCode(defaultFrom, "USD"));
-  const [to, setTo] = useState(() => resolveCode(defaultTo, "IRT"));
-  const [amount, setAmount] = useState(() => amountFromParam(defaultAmount));
+  const urlDefaults = syncUrl ? readUrlDefaults() : {};
+  const initialFrom = resolveCode(defaultFrom ?? urlDefaults.from, "USD");
+  const initialTo = resolveCode(defaultTo ?? urlDefaults.to, "IRT");
+  const initialAmount = amountFromParam(
+    defaultAmount ?? urlDefaults.amount ?? undefined,
+  );
+
+  const [from, setFrom] = useState(initialFrom);
+  const [to, setTo] = useState(initialTo);
+  const [amount, setAmount] = useState(initialAmount);
   const [copied, setCopied] = useState(false);
+  const readyToSync = useRef(false);
+
+  // Allow URL sync only after first paint so we never overwrite shared params
+  useEffect(() => {
+    readyToSync.current = true;
+  }, []);
 
   const byCode = useMemo(
     () => Object.fromEntries(quotes.map((q) => [q.code, q])),
@@ -132,9 +160,8 @@ export function Converter({
     (c) => c.code === "IRT" || byCode[c.code],
   );
 
-  // Only on the dedicated convert page — never rewrite URL from home/detail embeds
   useEffect(() => {
-    if (!syncUrl || typeof window === "undefined") return;
+    if (!syncUrl || !readyToSync.current || typeof window === "undefined") return;
     if (window.location.pathname !== "/convert") return;
     const next = buildSharePath(from, to, amount);
     const current = `${window.location.pathname}${window.location.search}`;
@@ -167,7 +194,7 @@ export function Converter({
         return;
       }
     } catch {
-      // cancelled or failed — fall through to clipboard
+      // cancelled or failed
     }
 
     try {
