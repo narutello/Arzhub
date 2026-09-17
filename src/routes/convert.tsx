@@ -16,11 +16,17 @@ type ConvertSearch = {
   amount?: string;
 };
 
+function asParam(value: unknown): string | undefined {
+  if (typeof value === "string" && value.trim() !== "") return value.trim();
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return undefined;
+}
+
 export const Route = createFileRoute("/convert")({
   validateSearch: (search: Record<string, unknown>): ConvertSearch => ({
-    from: typeof search.from === "string" ? search.from : undefined,
-    to: typeof search.to === "string" ? search.to : undefined,
-    amount: typeof search.amount === "string" ? search.amount : undefined,
+    from: asParam(search.from),
+    to: asParam(search.to),
+    amount: asParam(search.amount),
   }),
   loader: () => getRates(),
   head: () => ({
@@ -54,6 +60,10 @@ function ConvertPage() {
     );
   }
 
+  const from = search.from?.toUpperCase();
+  const to = search.to?.toUpperCase();
+  const amount = search.amount;
+
   return (
     <div className="space-y-5">
       <header className="space-y-1">
@@ -65,10 +75,11 @@ function ConvertPage() {
       {offline ? <OfflineBanner /> : null}
       {stale && error ? <StaleBanner message={error} /> : null}
       <Converter
+        key={`${from ?? ""}-${to ?? ""}-${amount ?? ""}`}
         quotes={snapshot.quotes}
-        defaultFrom={search.from?.toUpperCase()}
-        defaultTo={search.to?.toUpperCase()}
-        defaultAmount={search.amount}
+        defaultFrom={from}
+        defaultTo={to}
+        defaultAmount={amount}
         syncUrl
       />
       <SourceBar snapshot={snapshot} />
