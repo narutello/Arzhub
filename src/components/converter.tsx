@@ -71,16 +71,31 @@ function amountFromParam(raw: string | undefined): string {
   return cleaned ? formatWithSeparators(cleaned) : "۱";
 }
 
+function buildSharePath(from: string, to: string, amount: string): string {
+  const rawAmount = amount
+    .replace(/٬/g, "")
+    .replace(/٫/g, ".")
+    .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)));
+  const params = new URLSearchParams();
+  params.set("from", from);
+  params.set("to", to);
+  if (rawAmount) params.set("amount", rawAmount);
+  return `/convert?${params.toString()}`;
+}
+
 export function Converter({
   quotes,
   defaultFrom = "USD",
   defaultTo = "IRT",
   defaultAmount,
+  /** When true, keep the address bar in sync (only use on /convert page). */
+  syncUrl = false,
 }: {
   quotes: Quote[];
   defaultFrom?: string;
   defaultTo?: string;
   defaultAmount?: string;
+  syncUrl?: boolean;
 }) {
   const [from, setFrom] = useState(() => resolveCode(defaultFrom, "USD"));
   const [to, setTo] = useState(() => resolveCode(defaultTo, "IRT"));
@@ -117,23 +132,16 @@ export function Converter({
     (c) => c.code === "IRT" || byCode[c.code],
   );
 
-  // keep URL in sync so the address bar is always shareable
+  // Only on the dedicated convert page — never rewrite URL from home/detail embeds
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const rawAmount = amount
-      .replace(/٬/g, "")
-      .replace(/٫/g, ".")
-      .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)));
-    const params = new URLSearchParams();
-    params.set("from", from);
-    params.set("to", to);
-    if (rawAmount) params.set("amount", rawAmount);
-    const next = `/convert?${params.toString()}`;
+    if (!syncUrl || typeof window === "undefined") return;
+    if (window.location.pathname !== "/convert") return;
+    const next = buildSharePath(from, to, amount);
     const current = `${window.location.pathname}${window.location.search}`;
     if (current !== next) {
       window.history.replaceState(null, "", next);
     }
-  }, [from, to, amount]);
+  }, [syncUrl, from, to, amount]);
 
   function handleAmountChange(e: ChangeEvent<HTMLInputElement>) {
     const cleaned = sanitizeRaw(e.target.value);
@@ -146,16 +154,8 @@ export function Converter({
   }
 
   async function shareLink() {
-    const rawAmount = amount
-      .replace(/٬/g, "")
-      .replace(/٫/g, ".")
-      .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)));
-    const params = new URLSearchParams({
-      from,
-      to,
-      ...(rawAmount ? { amount: rawAmount } : {}),
-    });
-    const url = `${window.location.origin}/convert?${params.toString()}`;
+    const path = buildSharePath(from, to, amount);
+    const url = `${window.location.origin}${path}`;
 
     try {
       if (navigator.share) {
@@ -167,7 +167,7 @@ export function Converter({
         return;
       }
     } catch {
-      // user cancelled or share failed — fall through to clipboard
+      // cancelled or failed — fall through to clipboard
     }
 
     try {
