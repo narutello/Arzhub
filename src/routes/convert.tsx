@@ -60,10 +60,6 @@ function ConvertPage() {
     );
   }
 
-  const from = search.from?.toUpperCase();
-  const to = search.to?.toUpperCase();
-  const amount = search.amount;
-
   return (
     <div className="space-y-5">
       <header className="space-y-1">
@@ -75,11 +71,10 @@ function ConvertPage() {
       {offline ? <OfflineBanner /> : null}
       {stale && error ? <StaleBanner message={error} /> : null}
       <Converter
-        key={`${from ?? ""}-${to ?? ""}-${amount ?? ""}`}
         quotes={snapshot.quotes}
-        defaultFrom={from}
-        defaultTo={to}
-        defaultAmount={amount}
+        defaultFrom={search.from?.toUpperCase()}
+        defaultTo={search.to?.toUpperCase()}
+        defaultAmount={search.amount}
         syncUrl
       />
       <SourceBar snapshot={snapshot} />
