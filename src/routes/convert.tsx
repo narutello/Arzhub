@@ -69,6 +69,7 @@ function ConvertPage() {
         defaultFrom={search.from?.toUpperCase()}
         defaultTo={search.to?.toUpperCase()}
         defaultAmount={search.amount}
+        syncUrl
       />
       <SourceBar snapshot={snapshot} />
     </div>
