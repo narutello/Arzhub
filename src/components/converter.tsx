@@ -9,7 +9,11 @@ import type { Quote } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
-const MAX_DIGITS = 12;
+const MAX_INT_DIGITS = 12;
+/** Gold weights often need 3+ decimals (e.g. ۰٫۲۵۰ گرم) */
+const MAX_DEC_DIGITS = 6;
+
+const GOLD_WEIGHT_PRESETS = ["0.25", "0.5", "1", "2.5", "5", "10"] as const;
 
 function sanitizeRaw(value: string): string {
   let hasDecimal = false;
@@ -23,22 +27,48 @@ function sanitizeRaw(value: string): string {
       hasDecimal = true;
       result += ".";
     }
+    // ignore thousand separators (٬ and ,)
   }
-  const [intPart = "", decPart = ""] = result.split(".");
-  const limitedInt = intPart.slice(0, MAX_DIGITS);
-  const limitedDec = decPart.slice(0, 4);
-  return limitedDec.length > 0 ? `${limitedInt}.${limitedDec}` : limitedInt;
+
+  const endsWithDot = result.endsWith(".");
+  const [intPartRaw = "", decPartRaw = ""] = result.split(".");
+  let intPart = intPartRaw.slice(0, MAX_INT_DIGITS);
+  const decPart = decPartRaw.slice(0, MAX_DEC_DIGITS);
+
+  // ".5" → "0.5"
+  if (hasDecimal && intPart === "") intPart = "0";
+
+  if (endsWithDot) {
+    return `${intPart}.`;
+  }
+  if (hasDecimal) {
+    // keep trailing zeros while typing: "0.250"
+    return `${intPart}.${decPart}`;
+  }
+  return intPart;
 }
 
 function formatWithSeparators(raw: string): string {
   if (!raw) return "";
-  const [intPart = "", decPart] = raw.split(".");
+  const endsWithDot = raw.endsWith(".");
+  const [intPart = "0", decPart] = raw.split(".");
   const withSep = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, "٬");
   const faInt = toFaDigits(withSep);
-  if (decPart !== undefined && decPart.length > 0) {
+  if (endsWithDot) return `${faInt}٫`;
+  if (decPart !== undefined) {
     return `${faInt}٫${toFaDigits(decPart)}`;
   }
   return faInt;
+}
+
+function parseAmount(amount: string): number {
+  const normalized = amount
+    .replace(/٬/g, "")
+    .replace(/٫/g, ".")
+    .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)));
+  // trailing "." → still parse integer part
+  const n = Number(normalized.endsWith(".") ? normalized.slice(0, -1) : normalized);
+  return n;
 }
 
 function unitPrice(quote: Quote | undefined, currency: Currency): number | null {
@@ -75,7 +105,8 @@ function buildSharePath(from: string, to: string, amount: string): string {
   const rawAmount = amount
     .replace(/٬/g, "")
     .replace(/٫/g, ".")
-    .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)));
+    .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d)))
+    .replace(/\.$/, "");
   const params = new URLSearchParams();
   params.set("from", from);
   params.set("to", to);
@@ -96,6 +127,12 @@ function readUrlDefaults(): {
     to: p.get("to") ?? undefined,
     amount: p.get("amount") ?? undefined,
   };
+}
+
+function resultDecimals(toCur: Currency, value: number): number {
+  if (toCur.code === "IRT") return 0;
+  if (toCur.kind === "metal") return value >= 1 ? 3 : 4;
+  return value >= 100 ? 2 : 4;
 }
 
 export function Converter({
@@ -126,7 +163,6 @@ export function Converter({
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // next tick — avoid racing first paint / shared-link seed
     const t = window.setTimeout(() => {
       readyToSync.current = true;
     }, 0);
@@ -141,12 +177,7 @@ export function Converter({
   const fromCur = CONVERTIBLE.find((c) => c.code === from) ?? CONVERTIBLE[1];
   const toCur = CONVERTIBLE.find((c) => c.code === to) ?? CONVERTIBLE[0];
 
-  const numeric = Number(
-    amount
-      .replace(/٬/g, "")
-      .replace(/٫/g, ".")
-      .replace(/[۰-۹]/g, (d) => String(FA_DIGITS.indexOf(d))),
-  );
+  const numeric = parseAmount(amount);
 
   const fromPrice = unitPrice(byCode[fromCur.code], fromCur);
   const toPrice = unitPrice(byCode[toCur.code], toCur);
@@ -158,12 +189,12 @@ export function Converter({
   }
 
   const persianWords = result != null ? toPersianWords(result) : null;
+  const showWeightPresets = fromCur.kind === "metal";
 
   const fromOptions = CONVERTIBLE.filter(
     (c) => c.code === "IRT" || byCode[c.code],
   );
 
-  // Debounced URL sync — never remount; just update the address bar quietly
   useEffect(() => {
     if (!syncUrl || typeof window === "undefined") return;
     if (window.location.pathname !== "/convert") return;
@@ -186,6 +217,10 @@ export function Converter({
   function handleAmountChange(e: ChangeEvent<HTMLInputElement>) {
     const cleaned = sanitizeRaw(e.target.value);
     setAmount(formatWithSeparators(cleaned));
+  }
+
+  function applyPreset(raw: string) {
+    setAmount(formatWithSeparators(sanitizeRaw(raw)));
   }
 
   function swap() {
@@ -222,7 +257,7 @@ export function Converter({
   return (
     <div className="rounded-xl bg-card p-4 shadow-card min-w-0 overflow-hidden">
       <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 className="text-base font-medium shrink-0">تبدیل ارز</h2>
+        <h2 className="text-base font-medium shrink-0">تبدیل</h2>
         <div className="flex items-center gap-2">
           <p className="text-xs text-muted hidden sm:inline shrink-0">
             مبنای محاسبه: تومان
@@ -251,14 +286,38 @@ export function Converter({
       </div>
       <div className="grid gap-3 min-w-0">
         <label className="grid gap-1.5 min-w-0">
-          <span className="text-xs text-muted">مقدار</span>
+          <span className="text-xs text-muted">
+            مقدار
+            {fromCur.quoteUnitLabel ? (
+              <span className="text-subtle"> · {fromCur.quoteUnitLabel}</span>
+            ) : null}
+          </span>
           <Input
             inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
+            placeholder="مثلاً ۰٫۲۵۰"
             className="tabular-nums min-w-0 w-full overflow-hidden text-ellipsis"
           />
         </label>
+
+        {showWeightPresets ? (
+          <div className="flex flex-wrap gap-1.5">
+            {GOLD_WEIGHT_PRESETS.map((w) => (
+              <Button
+                key={w}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs tabular-nums"
+                onClick={() => applyPreset(w)}
+              >
+                {toFaDigits(w)} گرم
+              </Button>
+            ))}
+          </div>
+        ) : null}
+
         <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2 min-w-0">
           <CurrencySelect
             label="از"
@@ -291,14 +350,17 @@ export function Converter({
           ) : (
             <>
               <p className="text-xs text-muted break-words">
-                {amount || "۰"} {fromCur.flag} {fromCur.nameFa} برابر است با
+                {amount || "۰"}
+                {fromCur.quoteUnitLabel ? ` (${fromCur.quoteUnitLabel})` : ""}{" "}
+                {fromCur.flag} {fromCur.nameFa} برابر است با
               </p>
               <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight break-all leading-snug">
                 {toCur.code === "IRT"
                   ? formatToman(result, 0)
-                  : formatNumber(result, result >= 100 ? 2 : 4)}{" "}
+                  : formatNumber(result, resultDecimals(toCur, result))}{" "}
                 <span className="text-base font-medium text-muted">
                   {toCur.flag} {toCur.nameFa}
+                  {toCur.quoteUnitLabel ? ` · ${toCur.quoteUnitLabel}` : ""}
                 </span>
               </p>
               {persianWords && (
