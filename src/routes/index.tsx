@@ -9,6 +9,7 @@ import {
   DailySummary,
   FeaturedGrid,
   MarketStatus,
+  MetalsSection,
   Movers,
   SourceBar,
 } from "@/components/market-overview";
@@ -26,11 +27,11 @@ export const Route = createFileRoute("/")({
   loader: () => getRates(),
   head: () => ({
     meta: [
-      { title: "ارزهاب | قیمت لحظه‌ای ارز به تومان" },
+      { title: "ارزهاب | قیمت لحظه‌ای ارز و طلا به تومان" },
       {
         name: "description",
         content:
-          "نمای کلی بازار آزاد تهران: دلار، یورو، درهم و سایر ارزها به تومان، همراه با بیشترین افزایش و کاهش.",
+          "نمای کلی بازار آزاد تهران: دلار، یورو، طلا، سکه و سایر نرخ‌ها به تومان.",
       },
     ],
   }),
@@ -49,6 +50,12 @@ function Home() {
     return snapshot.quotes.filter((quote) => wanted.has(quote.code));
   }, [snapshot, q]);
 
+  const searching = q.trim().length > 0;
+  const fxOnly = useMemo(
+    () => filtered.filter((q) => q.currency.kind !== "metal"),
+    [filtered],
+  );
+
   if (isLoading) return <LoadingBoard />;
   if (!snapshot) {
     return (
@@ -64,9 +71,9 @@ function Home() {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">بازار ارز</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">بازار ارز و طلا</h1>
         <p className="text-sm text-muted">
-          قیمت‌های بازار آزاد تهران، به تومان. بدون نرخ رسمی یا تصادفی.
+          قیمت‌های بازار آزاد تهران به تومان — ارز، طلا و سکه.
         </p>
       </header>
       {offline ? <OfflineBanner /> : null}
@@ -74,11 +81,14 @@ function Home() {
       <MarketStatus snapshot={snapshot} />
       <DailySummary snapshot={snapshot} />
       <FeaturedGrid quotes={snapshot.quotes} />
+      {!searching ? <MetalsSection quotes={snapshot.quotes} /> : null}
       <Movers quotes={snapshot.quotes} />
 
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3">
-          <h2 className="text-base font-medium">همه ارزها</h2>
+          <h2 className="text-base font-medium">
+            {searching ? "نتایج جستجو" : "همه ارزها"}
+          </h2>
           <span className="text-xs text-subtle">قیمت به تومان</span>
         </div>
         <label className="relative block">
@@ -86,16 +96,16 @@ function Home() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="جستجوی دلار، یورو، درهم..."
+            placeholder="جستجوی دلار، طلا، سکه..."
             className="ps-10"
-            aria-label="جستجوی ارز"
+            aria-label="جستجوی ارز یا طلا"
           />
         </label>
-        {filtered.length === 0 ? (
+        {(searching ? filtered : fxOnly).length === 0 ? (
           <EmptySearch query={q} />
         ) : (
           <div className="divide-y divide-border rounded-xl bg-card px-1 py-1 shadow-card">
-            {filtered.map((quote) => (
+            {(searching ? filtered : fxOnly).map((quote) => (
               <CurrencyRow key={quote.code} quote={quote} />
             ))}
           </div>
