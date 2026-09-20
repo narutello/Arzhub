@@ -14,7 +14,8 @@ import appCss from "../styles.css?url";
 
 const APP_NAME = "ارزهاب";
 
-const THEME_BOOT = `(function(){try{var t=localStorage.getItem("arzhub-theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d)document.documentElement.classList.add("dark");}catch(e){}})();`;
+// Default light. Dark only when user explicitly saved "dark".
+const THEME_BOOT = `(function(){try{if(localStorage.getItem("arzhub-theme")==="dark")document.documentElement.classList.add("dark");}catch(e){}})();`;
 
 export const Route = createRootRoute({
   head: () => ({
@@ -27,7 +28,7 @@ export const Route = createRootRoute({
         content:
           "قیمت لحظه‌ای دلار، یورو، درهم و سایر ارزها در بازار آزاد تهران به تومان. نمودار، تبدیل ارز و فهرست پیگیری.",
       },
-      { name: "theme-color", content: "#0b0c0e" },
+      { name: "theme-color", content: "#f7f7f8" },
       { name: "color-scheme", content: "light dark" },
       { name: "robots", content: "index,follow" },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
