@@ -135,6 +135,11 @@ function resultDecimals(toCur: Currency, value: number): number {
   return value >= 100 ? 2 : 4;
 }
 
+/** Gram quick-picks only make sense for per-gram gold, not coins/mesghal */
+function isPerGramGold(c: Currency): boolean {
+  return c.code === "XAU18" || Boolean(c.quoteUnitLabel?.includes("گرم"));
+}
+
 export function Converter({
   quotes,
   defaultFrom = "USD",
@@ -189,7 +194,7 @@ export function Converter({
   }
 
   const persianWords = result != null ? toPersianWords(result) : null;
-  const showWeightPresets = fromCur.kind === "metal";
+  const showWeightPresets = isPerGramGold(fromCur);
 
   const fromOptions = CONVERTIBLE.filter(
     (c) => c.code === "IRT" || byCode[c.code],
@@ -296,7 +301,7 @@ export function Converter({
             inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
-            placeholder="مثلاً ۰٫۲۵۰"
+            placeholder={showWeightPresets ? "مثلاً ۰٫۲۵۰" : undefined}
             className="tabular-nums min-w-0 w-full overflow-hidden text-ellipsis"
           />
         </label>
