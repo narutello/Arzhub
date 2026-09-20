@@ -1,12 +1,156 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Check, Copy } from "lucide-react";
 import { HeroCard } from "@/components/currency-row";
 import { ChangeBadge, CodeMark, PriceValue } from "@/components/price";
+import { Button } from "@/components/ui/button";
 import type { Quote, Snapshot } from "@/lib/types";
-import { formatTehranDate, formatTehranTime } from "@/lib/format";
+import {
+  formatPercent,
+  formatTehranDate,
+  formatTehranTime,
+  formatToman,
+} from "@/lib/format";
 
 function rangePct(q: Quote) {
   if (q.high == null || q.low == null || q.low <= 0) return 0;
   return ((q.high - q.low) / q.low) * 100;
+}
+
+const SUMMARY_CODES = ["USD", "EUR", "AED", "GBP"] as const;
+
+function buildSummaryText(quotes: Quote[], fetchedAt: string): string {
+  const byCode = Object.fromEntries(quotes.map((q) => [q.code, q]));
+  const lines: string[] = ["خلاصه بازار آزاد — ارزهاب"];
+
+  for (const code of SUMMARY_CODES) {
+    const q = byCode[code];
+    if (!q) continue;
+    lines.push(
+      `${q.currency.nameFa}: ${formatToman(q.price, q.currency.decimals)} تومان (${formatPercent(q.changePercent)})`,
+    );
+  }
+
+  const sorted = [...quotes].sort((a, b) => b.changePercent - a.changePercent);
+  const top = sorted[0];
+  const bottom = sorted[sorted.length - 1];
+  if (top && top.changePercent > 0) {
+    lines.push(
+      `بیشترین رشد: ${top.currency.nameFa} (${formatPercent(top.changePercent)})`,
+    );
+  }
+  if (bottom && bottom.changePercent < 0) {
+    lines.push(
+      `بیشترین افت: ${bottom.currency.nameFa} (${formatPercent(bottom.changePercent)})`,
+    );
+  }
+
+  lines.push(
+    `${formatTehranDate(fetchedAt)} — ${formatTehranTime(fetchedAt)}`,
+  );
+  return lines.join("\n");
+}
+
+export function DailySummary({ snapshot }: { snapshot: Snapshot }) {
+  const [copied, setCopied] = useState(false);
+  const byCode = Object.fromEntries(
+    snapshot.quotes.map((q) => [q.code, q]),
+  );
+  const highlights = SUMMARY_CODES.map((c) => byCode[c]).filter(
+    Boolean,
+  ) as Quote[];
+
+  const sorted = [...snapshot.quotes].sort(
+    (a, b) => b.changePercent - a.changePercent,
+  );
+  const topGainer =
+    sorted.find((q) => q.changePercent > 0) ?? null;
+  const topLoser =
+    [...sorted].reverse().find((q) => q.changePercent < 0) ?? null;
+
+  async function copySummary() {
+    const text = buildSummaryText(snapshot.quotes, snapshot.fetchedAt);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  }
+
+  if (highlights.length === 0) return null;
+
+  return (
+    <section className="rounded-xl bg-card p-4 shadow-card">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h2 className="text-sm font-medium">خلاصه امروز</h2>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5 px-2.5 text-xs"
+          onClick={() => void copySummary()}
+          aria-label="کپی خلاصه بازار"
+        >
+          {copied ? (
+            <>
+              <Check className="size-3.5" />
+              کپی شد
+            </>
+          ) : (
+            <>
+              <Copy className="size-3.5" />
+              کپی برای اشتراک
+            </>
+          )}
+        </Button>
+      </div>
+
+      <ul className="space-y-2">
+        {highlights.map((q) => (
+          <li
+            key={q.code}
+            className="flex items-center justify-between gap-3 text-sm"
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              <span aria-hidden>{q.currency.flag}</span>
+              <span className="truncate font-medium">{q.currency.nameFa}</span>
+            </span>
+            <span className="flex shrink-0 items-center gap-2 tabular-nums">
+              <span className="font-medium">
+                <PriceValue value={q.price} decimals={q.currency.decimals} />
+              </span>
+              <ChangeBadge quote={q} />
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {(topGainer || topLoser) && (
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-border pt-3 text-xs text-muted">
+          {topGainer ? (
+            <p>
+              بیشترین رشد:{" "}
+              <span className="text-up">
+                {topGainer.currency.nameFa}{" "}
+                ({formatPercent(topGainer.changePercent)})
+              </span>
+            </p>
+          ) : null}
+          {topLoser ? (
+            <p>
+              بیشترین افت:{" "}
+              <span className="text-down">
+                {topLoser.currency.nameFa}{" "}
+                ({formatPercent(topLoser.changePercent)})
+              </span>
+            </p>
+          ) : null}
+        </div>
+      )}
+    </section>
+  );
 }
 
 export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
@@ -112,7 +256,9 @@ export function Movers({ quotes }: { quotes: Quote[] }) {
     .slice(0, 4);
 
   if (gainers.length === 0 && losers.length === 0) {
-    const volatile = [...quotes].sort((a, b) => rangePct(b) - rangePct(a)).slice(0, 4);
+    const volatile = [...quotes]
+      .sort((a, b) => rangePct(b) - rangePct(a))
+      .slice(0, 4);
     return (
       <MoverList
         title="بیشترین نوسان روزانه"
@@ -143,7 +289,13 @@ export function Movers({ quotes }: { quotes: Quote[] }) {
       />,
     );
   }
-  return <div className={`grid gap-3 ${columns.length > 1 ? "md:grid-cols-2" : ""}`}>{columns}</div>;
+  return (
+    <div
+      className={`grid gap-3 ${columns.length > 1 ? "md:grid-cols-2" : ""}`}
+    >
+      {columns}
+    </div>
+  );
 }
 
 export function FeaturedGrid({ quotes }: { quotes: Quote[] }) {
