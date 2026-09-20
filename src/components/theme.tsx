@@ -4,15 +4,14 @@ import { Button } from "@/components/ui/button";
 
 type Theme = "light" | "dark";
 
+/** Default is light. Dark only if the user previously chose it. */
 function readTheme(): Theme {
   try {
     const stored = localStorage.getItem("arzhub-theme");
-    if (stored === "light" || stored === "dark") return stored;
+    if (stored === "dark") return "dark";
+    if (stored === "light") return "light";
   } catch {
     /* ignore */
-  }
-  if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-    return "dark";
   }
   return "light";
 }
@@ -22,7 +21,9 @@ export function ThemeToggle() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setTheme(readTheme());
+    const next = readTheme();
+    setTheme(next);
+    document.documentElement.classList.toggle("dark", next === "dark");
     setReady(true);
   }, []);
 
