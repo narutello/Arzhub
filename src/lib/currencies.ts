@@ -12,6 +12,8 @@ export type Currency = {
   quoteUnitLabel?: string;
   featured: boolean;
   decimals: number;
+  /** fx = ارز، metal = طلا/سکه */
+  kind?: "fx" | "metal";
 };
 
 export const TOMAN: Currency = {
@@ -24,6 +26,7 @@ export const TOMAN: Currency = {
   quoteUnit: 1,
   featured: false,
   decimals: 0,
+  kind: "fx",
 };
 
 export const CURRENCIES: Currency[] = [
@@ -38,6 +41,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "EUR",
@@ -50,6 +54,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "GBP",
@@ -62,6 +67,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "AED",
@@ -74,6 +80,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "TRY",
@@ -86,6 +93,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "CNY",
@@ -98,6 +106,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "CHF",
@@ -110,6 +119,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "JPY",
@@ -123,6 +133,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnitLabel: "هر ۱۰۰ ین",
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "USDT",
@@ -134,6 +145,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "CAD",
@@ -146,6 +158,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "AUD",
@@ -158,6 +171,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "SAR",
@@ -170,6 +184,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: true,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "IQD",
@@ -182,6 +197,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "OMR",
@@ -194,6 +210,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "KWD",
@@ -206,6 +223,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "QAR",
@@ -218,6 +236,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "BHD",
@@ -230,6 +249,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "AFN",
@@ -242,6 +262,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "SEK",
@@ -254,6 +275,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "NOK",
@@ -266,6 +288,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "DKK",
@@ -278,6 +301,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "SGD",
@@ -290,6 +314,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "NZD",
@@ -301,6 +326,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "THB",
@@ -313,6 +339,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "AZN",
@@ -325,6 +352,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "AMD",
@@ -337,6 +365,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 1,
+    kind: "fx",
   },
   {
     code: "GEL",
@@ -348,6 +377,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "RUB",
@@ -360,6 +390,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "PKR",
@@ -371,6 +402,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 1,
+    kind: "fx",
   },
   {
     code: "MYR",
@@ -383,6 +415,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "INR",
@@ -395,6 +428,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "HKD",
@@ -407,6 +441,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "JOD",
@@ -418,6 +453,7 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 0,
+    kind: "fx",
   },
   {
     code: "KRW",
@@ -429,12 +465,102 @@ export const CURRENCIES: Currency[] = [
     quoteUnit: 1,
     featured: false,
     decimals: 1,
+    kind: "fx",
+  },
+  // —— طلا و سکه (قیمت TGJU به ریال؛ در market به تومان تبدیل می‌شود)
+  {
+    code: "XAU18",
+    nameFa: "طلای ۱۸ عیار",
+    nameEn: "18K Gold (per gram)",
+    countryFa: "طلا",
+    flag: "🥇",
+    tgjuKey: "geram18",
+    quoteUnit: 1,
+    quoteUnitLabel: "هر گرم",
+    featured: false,
+    decimals: 0,
+    kind: "metal",
+  },
+  {
+    code: "MESG",
+    nameFa: "مثقال طلا",
+    nameEn: "Gold Mesghal",
+    countryFa: "طلا",
+    flag: "🥇",
+    tgjuKey: "mesghal",
+    quoteUnit: 1,
+    featured: false,
+    decimals: 0,
+    kind: "metal",
+  },
+  {
+    code: "SEKEE",
+    nameFa: "سکه امامی",
+    nameEn: "Emami Coin",
+    countryFa: "سکه",
+    flag: "🪙",
+    tgjuKey: "sekee",
+    quoteUnit: 1,
+    featured: false,
+    decimals: 0,
+    kind: "metal",
+  },
+  {
+    code: "SEKEB",
+    nameFa: "سکه بهار آزادی",
+    nameEn: "Bahar Azadi Coin",
+    countryFa: "سکه",
+    flag: "🪙",
+    tgjuKey: "sekeb",
+    quoteUnit: 1,
+    featured: false,
+    decimals: 0,
+    kind: "metal",
+  },
+  {
+    code: "NIM",
+    nameFa: "نیم سکه",
+    nameEn: "Half Coin",
+    countryFa: "سکه",
+    flag: "🪙",
+    tgjuKey: "nim",
+    quoteUnit: 1,
+    featured: false,
+    decimals: 0,
+    kind: "metal",
+  },
+  {
+    code: "ROB",
+    nameFa: "ربع سکه",
+    nameEn: "Quarter Coin",
+    countryFa: "سکه",
+    flag: "🪙",
+    tgjuKey: "rob",
+    quoteUnit: 1,
+    featured: false,
+    decimals: 0,
+    kind: "metal",
+  },
+  {
+    code: "GERAMI",
+    nameFa: "سکه گرمی",
+    nameEn: "1g Coin",
+    countryFa: "سکه",
+    flag: "🪙",
+    tgjuKey: "gerami",
+    quoteUnit: 1,
+    featured: false,
+    decimals: 0,
+    kind: "metal",
   },
 ];
 
 export const CURRENCY_BY_CODE: Record<string, Currency> = Object.fromEntries(
   CURRENCIES.map((c) => [c.code, c]),
 );
+
+export const METALS = CURRENCIES.filter((c) => c.kind === "metal");
+export const FX_CURRENCIES = CURRENCIES.filter((c) => c.kind !== "metal");
 
 export const CONVERTIBLE: Currency[] = [TOMAN, ...CURRENCIES];
 
@@ -447,7 +573,14 @@ export function searchCurrencies(query: string): Currency[] {
       c.code.toLowerCase().includes(compact) ||
       c.nameFa.includes(q) ||
       c.nameEn.toLowerCase().includes(q) ||
-      c.countryFa.includes(q)
+      c.countryFa.includes(q) ||
+      (c.kind === "metal" &&
+        ("طلا".includes(q) ||
+          "سکه".includes(q) ||
+          q.includes("طلا") ||
+          q.includes("سکه") ||
+          q.includes("gold") ||
+          q.includes("coin")))
     );
   });
 }
