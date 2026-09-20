@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, Copy } from "lucide-react";
-import { HeroCard } from "@/components/currency-row";
+import { CurrencyRow, HeroCard } from "@/components/currency-row";
 import { ChangeBadge, CodeMark, PriceValue } from "@/components/price";
 import { Button } from "@/components/ui/button";
 import type { Quote, Snapshot } from "@/lib/types";
@@ -17,7 +17,7 @@ function rangePct(q: Quote) {
   return ((q.high - q.low) / q.low) * 100;
 }
 
-const SUMMARY_CODES = ["USD", "EUR", "AED", "GBP"] as const;
+const SUMMARY_CODES = ["USD", "EUR", "AED", "XAU18", "SEKEE"] as const;
 
 function buildSummaryText(quotes: Quote[], fetchedAt: string): string {
   const byCode = Object.fromEntries(quotes.map((q) => [q.code, q]));
@@ -63,8 +63,7 @@ export function DailySummary({ snapshot }: { snapshot: Snapshot }) {
   const sorted = [...snapshot.quotes].sort(
     (a, b) => b.changePercent - a.changePercent,
   );
-  const topGainer =
-    sorted.find((q) => q.changePercent > 0) ?? null;
+  const topGainer = sorted.find((q) => q.changePercent > 0) ?? null;
   const topLoser =
     [...sorted].reverse().find((q) => q.changePercent < 0) ?? null;
 
@@ -149,6 +148,25 @@ export function DailySummary({ snapshot }: { snapshot: Snapshot }) {
           ) : null}
         </div>
       )}
+    </section>
+  );
+}
+
+export function MetalsSection({ quotes }: { quotes: Quote[] }) {
+  const metals = quotes.filter((q) => q.currency.kind === "metal");
+  if (metals.length === 0) return null;
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-end justify-between gap-3">
+        <h2 className="text-base font-medium">طلا و سکه</h2>
+        <span className="text-xs text-subtle">قیمت به تومان</span>
+      </div>
+      <div className="divide-y divide-border rounded-xl bg-card px-1 py-1 shadow-card">
+        {metals.map((quote) => (
+          <CurrencyRow key={quote.code} quote={quote} />
+        ))}
+      </div>
     </section>
   );
 }
