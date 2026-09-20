@@ -6,6 +6,7 @@ import { useMarket } from "@/lib/use-market";
 import { searchCurrencies } from "@/lib/currencies";
 import { CurrencyRow } from "@/components/currency-row";
 import {
+  DailySummary,
   FeaturedGrid,
   MarketStatus,
   Movers,
@@ -38,7 +39,8 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const initial = Route.useLoaderData();
-  const { snapshot, error, stale, offline, isLoading, refetch } = useMarket(initial);
+  const { snapshot, error, stale, offline, isLoading, refetch } =
+    useMarket(initial);
   const [q, setQ] = useState("");
 
   const filtered = useMemo(() => {
@@ -70,6 +72,7 @@ function Home() {
       {offline ? <OfflineBanner /> : null}
       {stale && error ? <StaleBanner message={error} /> : null}
       <MarketStatus snapshot={snapshot} />
+      <DailySummary snapshot={snapshot} />
       <FeaturedGrid quotes={snapshot.quotes} />
       <Movers quotes={snapshot.quotes} />
 
