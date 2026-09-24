@@ -4,6 +4,8 @@ export type Quote = {
   code: string;
   currency: Currency;
   price: number;
+  /** قیمت دلاری (فقط رمزارز) */
+  priceUsd: number | null;
   change: number;
   changePercent: number;
   high: number | null;
