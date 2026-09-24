@@ -46,7 +46,7 @@ export const CRYPTO_ITEMS: Currency[] = [
   },
   {
     code: "TON",
-    nameFa: "تون (گرام)",
+    nameFa: "گرام (تون)",
     nameEn: "Toncoin",
     countryFa: "رمزارز",
     flag: "💎",
