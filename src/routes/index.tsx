@@ -6,7 +6,6 @@ import { useMarket } from "@/lib/use-market";
 import { searchCurrencies } from "@/lib/currencies";
 import { CurrencyRow } from "@/components/currency-row";
 import {
-  DailySummary,
   FeaturedGrid,
   MarketStatus,
   MetalsSection,
@@ -79,7 +78,6 @@ function Home() {
       {offline ? <OfflineBanner /> : null}
       {stale && error ? <StaleBanner message={error} /> : null}
       <MarketStatus snapshot={snapshot} />
-      <DailySummary snapshot={snapshot} />
       <FeaturedGrid quotes={snapshot.quotes} />
       {!searching ? <MetalsSection quotes={snapshot.quotes} /> : null}
       <Movers quotes={snapshot.quotes} />
