@@ -6,6 +6,7 @@ import { useMarket } from "@/lib/use-market";
 import { searchCurrencies } from "@/lib/currencies";
 import { CurrencyRow } from "@/components/currency-row";
 import {
+  CryptoSection,
   FeaturedGrid,
   MarketStatus,
   MetalsSection,
@@ -51,7 +52,10 @@ function Home() {
 
   const searching = q.trim().length > 0;
   const fxOnly = useMemo(
-    () => filtered.filter((q) => q.currency.kind !== "metal"),
+    () =>
+      filtered.filter(
+        (q) => q.currency.kind !== "metal" && q.currency.kind !== "crypto",
+      ),
     [filtered],
   );
 
@@ -72,7 +76,7 @@ function Home() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">بازار ارز و طلا</h1>
         <p className="text-sm text-muted">
-          قیمت‌های بازار آزاد تهران به تومان — ارز، طلا و سکه.
+          قیمت‌های بازار آزاد تهران — ارز، طلا، سکه و رمزارز.
         </p>
       </header>
       {offline ? <OfflineBanner /> : null}
@@ -80,6 +84,7 @@ function Home() {
       <MarketStatus snapshot={snapshot} />
       <FeaturedGrid quotes={snapshot.quotes} />
       {!searching ? <MetalsSection quotes={snapshot.quotes} /> : null}
+      {!searching ? <CryptoSection quotes={snapshot.quotes} /> : null}
       <Movers quotes={snapshot.quotes} />
 
       <section className="space-y-3">
@@ -94,7 +99,7 @@ function Home() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="جستجوی دلار، طلا، سکه..."
+            placeholder="جستجوی دلار، طلا، بیت‌کوین..."
             className="ps-10"
             aria-label="جستجوی ارز یا طلا"
           />
