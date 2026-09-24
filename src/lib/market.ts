@@ -105,10 +105,21 @@ function quotesFromTgju(current: Record<string, TgjuTick>): Quote[] {
     let direction = directionOf(change);
     if (direction === "flat" && dt === "high") direction = "up";
     if (direction === "flat" && dt === "low") direction = "down";
+
+    let priceUsd: number | null = null;
+    if (currency.tgjuUsdKey) {
+      const usdTick = current[currency.tgjuUsdKey];
+      if (usdTick) {
+        const usd = parseNum(usdTick.p);
+        if (Number.isFinite(usd) && usd > 0) priceUsd = usd;
+      }
+    }
+
     quotes.push({
       code: currency.code,
       currency,
       price,
+      priceUsd,
       change,
       changePercent: Number.isFinite(changePercent) ? changePercent : 0,
       high: Number.isFinite(highRial) ? rialToToman(highRial) : null,
@@ -193,6 +204,7 @@ async function fetchBonbastSnapshot(): Promise<Snapshot> {
       code: currency.code,
       currency,
       price,
+      priceUsd: null,
       change: 0,
       changePercent: 0,
       high: null,
