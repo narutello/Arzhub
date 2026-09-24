@@ -1,3 +1,5 @@
+import { CRYPTO_ITEMS } from "./cryptos";
+
 export type Currency = {
   code: string;
   nameFa: string;
@@ -6,14 +8,18 @@ export type Currency = {
   /** Country / region flag emoji */
   flag: string;
   tgjuKey: string;
+  /** کلید دلاری TGJU (فقط رمزارز) */
+  tgjuUsdKey?: string;
   bonbastKey?: string;
   /** How many foreign units the listed price refers to (e.g. 100 for JPY). */
   quoteUnit: number;
   quoteUnitLabel?: string;
   featured: boolean;
   decimals: number;
-  /** fx = ارز، metal = طلا/سکه */
-  kind?: "fx" | "metal";
+  /** اعشار نمایش دلاری (رمزارز) */
+  decimalsUsd?: number;
+  /** fx = ارز، metal = طلا/سکه، crypto = رمزارز */
+  kind?: "fx" | "metal" | "crypto";
 };
 
 export const TOMAN: Currency = {
@@ -131,18 +137,6 @@ export const CURRENCIES: Currency[] = [
     bonbastKey: "jpy",
     quoteUnit: 100,
     quoteUnitLabel: "هر ۱۰۰ ین",
-    featured: true,
-    decimals: 0,
-    kind: "fx",
-  },
-  {
-    code: "USDT",
-    nameFa: "تتر",
-    nameEn: "Tether",
-    countryFa: "دلار دیجیتال",
-    flag: "₮",
-    tgjuKey: "crypto-tether-irr",
-    quoteUnit: 1,
     featured: true,
     decimals: 0,
     kind: "fx",
@@ -553,6 +547,8 @@ export const CURRENCIES: Currency[] = [
     decimals: 0,
     kind: "metal",
   },
+  // —— رمزارز (BTC, ETH, USDT, TON)
+  ...CRYPTO_ITEMS,
 ];
 
 export const CURRENCY_BY_CODE: Record<string, Currency> = Object.fromEntries(
@@ -560,7 +556,10 @@ export const CURRENCY_BY_CODE: Record<string, Currency> = Object.fromEntries(
 );
 
 export const METALS = CURRENCIES.filter((c) => c.kind === "metal");
-export const FX_CURRENCIES = CURRENCIES.filter((c) => c.kind !== "metal");
+export const FX_CURRENCIES = CURRENCIES.filter(
+  (c) => c.kind !== "metal" && c.kind !== "crypto",
+);
+export const CRYPTOS = CURRENCIES.filter((c) => c.kind === "crypto");
 
 export const CONVERTIBLE: Currency[] = [TOMAN, ...CURRENCIES];
 
@@ -575,12 +574,23 @@ export function searchCurrencies(query: string): Currency[] {
       c.nameEn.toLowerCase().includes(q) ||
       c.countryFa.includes(q) ||
       (c.kind === "metal" &&
-        ("طلا".includes(q) ||
-          "سکه".includes(q) ||
-          q.includes("طلا") ||
+        (q.includes("طلا") ||
           q.includes("سکه") ||
           q.includes("gold") ||
-          q.includes("coin")))
+          q.includes("coin"))) ||
+      (c.kind === "crypto" &&
+        (q.includes("رمزارز") ||
+          q.includes("کریپتو") ||
+          q.includes("crypto") ||
+          q.includes("بیت") ||
+          q.includes("اتریوم") ||
+          q.includes("تتر") ||
+          q.includes("تون") ||
+          q.includes("گرام") ||
+          q.includes("bitcoin") ||
+          q.includes("ethereum") ||
+          q.includes("tether") ||
+          q.includes("ton")))
     );
   });
 }
