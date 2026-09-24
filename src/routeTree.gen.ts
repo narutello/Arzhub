@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConvertRouteImport } from './routes/convert'
+import { Route as CryptoRouteImport } from './routes/crypto'
 import { Route as CurrenciesRouteImport } from './routes/currencies'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as CurrenciesIndexRouteImport } from './routes/currencies.index'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ConvertRoute = ConvertRouteImport.update({
   id: '/convert',
   path: '/convert',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CryptoRoute = CryptoRouteImport.update({
+  id: '/crypto',
+  path: '/crypto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CurrenciesRoute = CurrenciesRouteImport.update({
@@ -50,6 +56,7 @@ const CurrenciesCodeRoute = CurrenciesCodeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/convert': typeof ConvertRoute
+  '/crypto': typeof CryptoRoute
   '/currencies': typeof CurrenciesRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/currencies/$code': typeof CurrenciesCodeRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/convert': typeof ConvertRoute
+  '/crypto': typeof CryptoRoute
   '/watchlist': typeof WatchlistRoute
   '/currencies/$code': typeof CurrenciesCodeRoute
   '/currencies': typeof CurrenciesIndexRoute
@@ -66,6 +74,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/convert': typeof ConvertRoute
+  '/crypto': typeof CryptoRoute
   '/currencies': typeof CurrenciesRouteWithChildren
   '/watchlist': typeof WatchlistRoute
   '/currencies/$code': typeof CurrenciesCodeRoute
@@ -76,16 +85,24 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/convert'
+    | '/crypto'
     | '/currencies'
     | '/watchlist'
     | '/currencies/$code'
     | '/currencies/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/convert' | '/watchlist' | '/currencies/$code' | '/currencies'
+  to:
+    | '/'
+    | '/convert'
+    | '/crypto'
+    | '/watchlist'
+    | '/currencies/$code'
+    | '/currencies'
   id:
     | '__root__'
     | '/'
     | '/convert'
+    | '/crypto'
     | '/currencies'
     | '/watchlist'
     | '/currencies/$code'
@@ -95,6 +112,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConvertRoute: typeof ConvertRoute
+  CryptoRoute: typeof CryptoRoute
   CurrenciesRoute: typeof CurrenciesRouteWithChildren
   WatchlistRoute: typeof WatchlistRoute
 }
@@ -113,6 +131,13 @@ declare module '@tanstack/react-router' {
       path: '/convert'
       fullPath: '/convert'
       preLoaderRoute: typeof ConvertRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crypto': {
+      id: '/crypto'
+      path: '/crypto'
+      fullPath: '/crypto'
+      preLoaderRoute: typeof CryptoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/currencies': {
@@ -163,6 +188,7 @@ const CurrenciesRouteWithChildren = CurrenciesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConvertRoute: ConvertRoute,
+  CryptoRoute: CryptoRoute,
   CurrenciesRoute: CurrenciesRouteWithChildren,
   WatchlistRoute: WatchlistRoute,
 }
