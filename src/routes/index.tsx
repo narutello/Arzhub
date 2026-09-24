@@ -6,13 +6,13 @@ import { useMarket } from "@/lib/use-market";
 import { searchCurrencies } from "@/lib/currencies";
 import { CurrencyRow } from "@/components/currency-row";
 import {
-  CryptoSection,
   FeaturedGrid,
   MarketStatus,
   MetalsSection,
   Movers,
   SourceBar,
 } from "@/components/market-overview";
+import { CryptoSection } from "@/components/crypto-section";
 import { Converter } from "@/components/converter";
 import { Input } from "@/components/ui/input";
 import {
