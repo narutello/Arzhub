@@ -21,7 +21,7 @@ export const Route = createFileRoute("/crypto")({
       {
         name: "description",
         content:
-          "قیمت بیت‌کوین، اتریوم، تتر و تون به تومان و دلار — بازار آزاد.",
+          "قیمت بیت‌کوین، اتریوم، تتر و گرام (تون) به تومان و دلار — بازار آزاد.",
       },
     ],
   }),
@@ -54,7 +54,7 @@ function CryptoPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">رمزارز</h1>
           <p className="text-sm text-muted">
-            بیت‌کوین، اتریوم، تتر و تون — قیمت بازار.
+            بیت‌کوین، اتریوم، تتر و گرام (تون) — قیمت بازار.
           </p>
         </div>
         <UnitSwitch unit={unit} onChange={setUnit} />
