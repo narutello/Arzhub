@@ -194,27 +194,35 @@ export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
 }
 
 export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
+  const open = snapshot.marketOpen;
+  const stamp = `${formatTehranDate(snapshot.fetchedAt)} · ${formatTehranTime(snapshot.fetchedAt)}`;
+
   return (
     <div className="rounded-xl bg-card px-4 py-3 shadow-card">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="text-sm font-medium">بازار آزاد تهران</span>
-        <span
-          className={
-            snapshot.marketOpen
-              ? "rounded-full bg-up/12 px-2 py-0.5 text-xs text-up"
-              : "rounded-full bg-card-2 px-2 py-0.5 text-xs text-muted"
-          }
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <span className="text-sm font-medium">بازار آزاد تهران</span>
+          <span
+            className={
+              open
+                ? "rounded-full bg-up/12 px-2 py-0.5 text-xs text-up"
+                : "rounded-full bg-card-2 px-2 py-0.5 text-xs text-muted"
+            }
+          >
+            {open ? "آخرین نرخ جاری" : "تعطیل / آخرین جلسه"}
+          </span>
+        </div>
+        <time
+          dateTime={snapshot.fetchedAt}
+          className="text-xs text-subtle tabular-nums"
         >
-          {snapshot.marketOpen ? "آخرین نرخ جاری" : "تعطیل / آخرین جلسه"}
-        </span>
+          {stamp}
+        </time>
       </div>
-      {snapshot.note ? (
-        <p className="mt-1 text-sm text-muted">{snapshot.note}</p>
-      ) : (
-        <p className="mt-1 text-sm text-muted">
-          قیمت‌ها به تومان است. هر تومان برابر ۱۰ ریال.
-        </p>
-      )}
+      <p className="mt-1.5 text-sm text-muted">
+        {snapshot.note ??
+          "قیمت‌ها به تومان است. هر تومان برابر ۱۰ ریال."}
+      </p>
     </div>
   );
 }
