@@ -37,10 +37,7 @@ function rialToToman(rial: number): number {
   return rial / 10;
 }
 
-function tehranNow(): Date {
-  return new Date();
-}
-
+/** True when `iso` falls on today's calendar date in Asia/Tehran. */
 function isSameTehranDay(iso: string | null): boolean {
   if (!iso) return false;
   try {
@@ -50,10 +47,32 @@ function isSameTehranDay(iso: string | null): boolean {
       month: "2-digit",
       day: "2-digit",
     });
-    return fmt.format(new Date(iso)) === fmt.format(tehranNow());
+    return fmt.format(new Date(iso)) === fmt.format(new Date());
   } catch {
     return false;
   }
+}
+
+/** Newest non-null quote timestamp (ISO strings compare lexicographically). */
+function newestUpdatedAt(quotes: Quote[]): string | null {
+  let best: string | null = null;
+  for (const q of quotes) {
+    if (q.updatedAt && (!best || q.updatedAt > best)) best = q.updatedAt;
+  }
+  return best;
+}
+
+function marketStatusFromQuotes(quotes: Quote[]): {
+  marketOpen: boolean;
+  note: string | null;
+} {
+  const marketOpen = isSameTehranDay(newestUpdatedAt(quotes));
+  return {
+    marketOpen,
+    note: marketOpen
+      ? null
+      : "بازار امروز تعطیل است؛ آخرین نرخ معاملاتی نمایش داده می‌شود.",
+  };
 }
 
 function directionOf(change: number): Quote["direction"] {
@@ -143,21 +162,14 @@ async function fetchTgjuSnapshot(): Promise<Snapshot> {
   if (quotes.length < 6) {
     throw new Error("تعداد ارزهای دریافتی کافی نبود");
   }
-  const newest = quotes
-    .map((q) => q.updatedAt)
-    .filter((d): d is string => Boolean(d))
-    .sort()
-    .at(-1);
-  const marketOpen = isSameTehranDay(newest ?? null);
+  const { marketOpen, note } = marketStatusFromQuotes(quotes);
   return {
     quotes,
     sourceName: "شبکه اطلاع‌رسانی طلا و ارز (TGJU)",
     sourceUrl: "https://www.tgju.org/",
     fetchedAt: new Date().toISOString(),
     marketOpen,
-    note: marketOpen
-      ? null
-      : "بازار امروز تعطیل است؛ آخرین نرخ معاملاتی نمایش داده می‌شود.",
+    note,
   };
 }
 
@@ -190,6 +202,9 @@ async function fetchBonbastSnapshot(): Promise<Snapshot> {
   if (json.rest || !json.usd1) {
     throw new Error("Bonbast نرخ‌ها را برنگرداند");
   }
+  const updatedAt = json.last_modified
+    ? new Date(json.last_modified).toISOString()
+    : null;
   const quotes: Quote[] = [];
   for (const currency of CURRENCIES) {
     if (!currency.bonbastKey) continue;
@@ -209,20 +224,19 @@ async function fetchBonbastSnapshot(): Promise<Snapshot> {
       changePercent: 0,
       high: null,
       low: null,
-      updatedAt: json.last_modified
-        ? new Date(json.last_modified).toISOString()
-        : null,
+      updatedAt,
       direction: "flat",
     });
   }
   if (quotes.length < 6) throw new Error("تعداد ارزهای Bonbast کافی نبود");
+  const { marketOpen, note } = marketStatusFromQuotes(quotes);
   return {
     quotes,
     sourceName: "Bonbast — بازار آزاد تهران",
     sourceUrl: "https://www.bonbast.com/",
     fetchedAt: new Date().toISOString(),
-    marketOpen: true,
-    note: null,
+    marketOpen,
+    note,
   };
 }
 
