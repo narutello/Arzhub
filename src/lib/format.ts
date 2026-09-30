@@ -34,9 +34,8 @@ export function formatPercent(value: number): string {
   return `${body}٪`;
 }
 
-const tehranDate = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+const tehranParts = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
   timeZone: "Asia/Tehran",
-  weekday: "long",
   day: "numeric",
   month: "long",
   year: "numeric",
@@ -54,20 +53,26 @@ const tehranShort = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
   month: "short",
 });
 
-/** Compact date+time for share text: «۱۷ شهریور ۱۴۰۵ — ۱۴:۳۰» */
-const tehranShareLine = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
-  timeZone: "Asia/Tehran",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+function part(
+  parts: Intl.DateTimeFormatPart[],
+  type: Intl.DateTimeFormatPartTypes,
+): string {
+  return parts.find((p) => p.type === type)?.value ?? "";
+}
+
+/** Force day–month–year order: «۹ مهر ۱۴۰۵» */
+function formatDayMonthYear(d: Date): string {
+  const parts = tehranParts.formatToParts(d);
+  const day = part(parts, "day");
+  const month = part(parts, "month");
+  const year = part(parts, "year");
+  return [day, month, year].filter(Boolean).join(" ");
+}
 
 export function formatTehranDate(iso: string | number | Date): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return tehranDate.format(d);
+  return formatDayMonthYear(d);
 }
 
 export function formatTehranTime(iso: string | number | Date): string {
@@ -91,7 +96,7 @@ export function formatChartTick(iso: string): string {
 /**
  * Shareable price text (format 4):
  * دلار آمریکا: ۱۱۵٬۴۲۰ تومان
- * ۱۷ شهریور ۱۴۰۵، ۱۴:۳۰
+ * ۹ مهر ۱۴۰۵ — ۱۴:۳۰
  */
 export function formatPriceShare({
   nameFa,
@@ -109,10 +114,7 @@ export function formatPriceShare({
   const priceLine = `${nameFa}: ${formatToman(price, decimals)} ${unitLabel}`;
   const when = updatedAt != null ? new Date(updatedAt) : new Date();
   if (Number.isNaN(when.getTime())) return priceLine;
-  // Intl often uses «،» between date and time — normalize to em dash style
-  const stamped = tehranShareLine
-    .format(when)
-    .replace(/،\s*/g, " — ")
-    .replace(/,/g, " —");
-  return `${priceLine}\n${stamped}`;
+  const date = formatDayMonthYear(when);
+  const time = tehranTime.format(when);
+  return `${priceLine}\n${date} — ${time}`;
 }
