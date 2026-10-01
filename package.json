@@ -4,7 +4,9 @@
   "sideEffects": false,
   "type": "module",
   "overrides": {
-    "nf3": "0.3.17"
+    "nf3": "0.3.17",
+    "@tanstack/react-start": "1.168.60",
+    "@tanstack/start-server-core": "1.169.39"
   },
   "scripts": {
     "dev": "node scripts/with-app-env.mjs vite dev --host 0.0.0.0 --port 8080",
@@ -48,7 +50,7 @@
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/react-query": "^5.103.1",
     "@tanstack/react-router": "^1.170.38",
-    "@tanstack/react-start": "^1.168.60",
+    "@tanstack/react-start": "1.168.60",
     "@tanstack/react-table": "^9.2.4",
     "@tanstack/router-plugin": "^1.168.0",
     "@vercel/analytics": "^2.0.1",
