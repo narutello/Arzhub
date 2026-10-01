@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider } from "@/lib/auth/provider";
+import { ChunkLoadRecovery } from "@/lib/chunk-load-recovery";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { AppProviders } from "@/components/providers";
 import { Shell } from "@/components/shell";
@@ -65,6 +66,7 @@ function RootComponent() {
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
       </head>
       <body>
+        <ChunkLoadRecovery />
         <PreviewHostBridge />
         <AuthProvider>
           <AppProviders>
