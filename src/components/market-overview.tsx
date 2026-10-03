@@ -4,6 +4,7 @@ import { Check, Copy } from "lucide-react";
 import { CurrencyRow, HeroCard } from "@/components/currency-row";
 import { ChangeBadge, CodeMark, PriceValue } from "@/components/price";
 import { Button } from "@/components/ui/button";
+import { computeMarketPulse, type PulseLevel } from "@/lib/market-pulse";
 import type { Quote, Snapshot } from "@/lib/types";
 import {
   formatPercent,
@@ -49,6 +50,44 @@ function buildSummaryText(quotes: Quote[], fetchedAt: string): string {
     `${formatTehranDate(fetchedAt)} — ${formatTehranTime(fetchedAt)}`,
   );
   return lines.join("\n");
+}
+
+function pulseBadgeClass(level: PulseLevel): string {
+  switch (level) {
+    case "calm":
+      return "bg-up/12 text-up";
+    case "turbulent":
+      return "bg-down/12 text-down";
+    case "normal":
+      return "bg-card-2 text-muted";
+    case "forming":
+    default:
+      return "bg-card-2 text-subtle";
+  }
+}
+
+/** Three dots: intensity grows with pulse level. */
+function PulseDots({ level }: { level: PulseLevel }) {
+  const active =
+    level === "turbulent" ? 3 : level === "normal" ? 2 : level === "calm" ? 1 : 0;
+  return (
+    <span className="inline-flex items-center gap-0.5" aria-hidden>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className={
+            i < active
+              ? level === "turbulent"
+                ? "size-1.5 rounded-full bg-down"
+                : level === "calm"
+                  ? "size-1.5 rounded-full bg-up"
+                  : "size-1.5 rounded-full bg-muted"
+              : "size-1.5 rounded-full bg-border"
+          }
+        />
+      ))}
+    </span>
+  );
 }
 
 export function DailySummary({ snapshot }: { snapshot: Snapshot }) {
@@ -196,6 +235,9 @@ export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
 export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
   const open = snapshot.marketOpen;
   const stamp = `${formatTehranDate(snapshot.fetchedAt)} · ${formatTehranTime(snapshot.fetchedAt)}`;
+  const pulse = computeMarketPulse(snapshot.quotes, {
+    marketOpen: snapshot.marketOpen,
+  });
 
   return (
     <div className="rounded-xl bg-card px-4 py-3 shadow-card">
@@ -209,6 +251,13 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
           }
         >
           {open ? "آخرین نرخ جاری" : "تعطیل / آخرین جلسه"}
+        </span>
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs ${pulseBadgeClass(pulse.level)}`}
+          title={pulse.hint}
+        >
+          <PulseDots level={pulse.level} />
+          <span>نبض · {pulse.label}</span>
         </span>
       </div>
       <time
