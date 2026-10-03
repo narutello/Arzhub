@@ -233,6 +233,7 @@ export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
 }
 
 export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
+  const [pulseOpen, setPulseOpen] = useState(false);
   const open = snapshot.marketOpen;
   const stamp = `${formatTehranDate(snapshot.fetchedAt)} · ${formatTehranTime(snapshot.fetchedAt)}`;
   const pulse = computeMarketPulse(snapshot.quotes, {
@@ -252,14 +253,35 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
         >
           {open ? "آخرین نرخ جاری" : "تعطیل / آخرین جلسه"}
         </span>
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs ${pulseBadgeClass(pulse.level)}`}
-          title={pulse.hint}
+        <button
+          type="button"
+          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs transition-opacity ${pulseBadgeClass(pulse.level)} ${pulseOpen ? "ring-1 ring-border" : ""}`}
+          onClick={() => setPulseOpen((v) => !v)}
+          aria-expanded={pulseOpen}
+          aria-controls="market-pulse-hint"
         >
           <PulseDots level={pulse.level} />
           <span>نبض · {pulse.label}</span>
-        </span>
+        </button>
       </div>
+      {pulseOpen ? (
+        <p
+          id="market-pulse-hint"
+          className="mt-2 rounded-lg bg-card-2 px-3 py-2 text-xs leading-relaxed text-muted"
+          role="note"
+        >
+          {pulse.hint}
+          {pulse.score != null ? (
+            <span className="mt-1 block text-subtle tabular-nums">
+              میانگین دامنهٔ نمادهای اصلی: حدود{" "}
+              {pulse.score.toLocaleString("fa-IR", {
+                maximumFractionDigits: 1,
+              })}
+              ٪
+            </span>
+          ) : null}
+        </p>
+      ) : null}
       <time
         dateTime={snapshot.fetchedAt}
         className="mt-1 block text-xs text-subtle tabular-nums"
