@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, Copy } from "lucide-react";
 import { CurrencyRow, HeroCard } from "@/components/currency-row";
@@ -111,7 +111,7 @@ function marketNarrative(
 
   if (pulse.level === "turbulent") {
     if (lead && Math.abs(lead.changePercent) >= 0.15) {
-      return `دامنهٔ حرکت امروز بالاست؛ ${lead.currency.nameFa} بیشترین جابه‌جایی را داشته است.`
+      return `دامنهٔ حرکت امروز بالاست؛ ${lead.currency.nameFa} بیشترین جابه‌جایی را داشته است.`;
     }
     return "دامنهٔ حرکت نمادهای اصلی امروز بالاتر از حالت عادی است.";
   }
@@ -304,7 +304,7 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
   const narrative = marketNarrative(open, pulse, snapshot.quotes);
   const chip = sourceChip(snapshot.sourceName);
 
-  async function copyStatus(e: React.MouseEvent) {
+  async function copyStatus(e: MouseEvent) {
     e.stopPropagation();
     const text = [
       "بازار آزاد تهران",
@@ -326,7 +326,6 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
     <div
       className={`rounded-xl border bg-card px-4 py-3 shadow-card ${statusBorderClass(open, pulse.level)}`}
     >
-      {/* Row 1: title + live status */}
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
         <span className="text-sm font-semibold tracking-tight">
           بازار آزاد تهران
@@ -358,7 +357,6 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
           href={snapshot.sourceUrl}
           target="_blank"
           rel="noreferrer"
-          onClick={(e) => e.stopPropagation()}
           className="rounded-full bg-card-2 px-2 py-0.5 text-[0.6875rem] text-subtle transition-colors hover:text-foreground"
           title={snapshot.sourceName}
         >
@@ -366,7 +364,6 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
         </a>
       </div>
 
-      {/* Row 2: time hierarchy */}
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-subtle">
         <time dateTime={snapshot.fetchedAt} className="tabular-nums">
           {absolute}
@@ -395,10 +392,8 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
         </button>
       </div>
 
-      {/* Row 3: narrative */}
       <p className="mt-2 text-sm leading-relaxed text-muted">{narrative}</p>
 
-      {/* Expandable detail */}
       <button
         type="button"
         className="mt-2 text-xs text-subtle underline-offset-2 hover:text-foreground hover:underline"
