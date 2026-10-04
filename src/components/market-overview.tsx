@@ -4,10 +4,16 @@ import { Check, Copy } from "lucide-react";
 import { CurrencyRow, HeroCard } from "@/components/currency-row";
 import { ChangeBadge, CodeMark, PriceValue } from "@/components/price";
 import { Button } from "@/components/ui/button";
-import { computeMarketPulse, type PulseLevel } from "@/lib/market-pulse";
+import {
+  computeMarketPulse,
+  PULSE_CODES,
+  type MarketPulse,
+  type PulseLevel,
+} from "@/lib/market-pulse";
 import type { Quote, Snapshot } from "@/lib/types";
 import {
   formatPercent,
+  formatRelativeFa,
   formatTehranDate,
   formatTehranTime,
   formatToman,
@@ -18,7 +24,7 @@ function rangePct(q: Quote) {
   return ((q.high - q.low) / q.low) * 100;
 }
 
-const SUMMARY_CODES = ["USD", "EUR", "AED", "XAU18", "SEKEE"] as const;
+const SUMMARY_CODES = PULSE_CODES;
 
 function buildSummaryText(quotes: Quote[], fetchedAt: string): string {
   const byCode = Object.fromEntries(quotes.map((q) => [q.code, q]));
@@ -64,6 +70,60 @@ function pulseBadgeClass(level: PulseLevel): string {
     default:
       return "bg-card-2 text-subtle";
   }
+}
+
+function statusBorderClass(open: boolean, level: PulseLevel): string {
+  if (!open) return "border-border";
+  if (level === "turbulent") return "border-down/25";
+  if (level === "calm") return "border-up/25";
+  return "border-border";
+}
+
+/** Short source chip from full sourceName. */
+function sourceChip(sourceName: string): string {
+  const n = sourceName.toLowerCase();
+  if (n.includes("bonbast")) return "Bonbast";
+  if (n.includes("tgju") || n.includes("طلا و ارز")) return "TGJU";
+  return sourceName.length > 18 ? `${sourceName.slice(0, 16)}…` : sourceName;
+}
+
+/** One human line for the day — not a table. */
+function marketNarrative(
+  open: boolean,
+  pulse: MarketPulse,
+  quotes: Quote[],
+): string {
+  if (!open) {
+    return "بازار امروز بسته است؛ آخرین نرخ معاملاتی نمایش داده می‌شود.";
+  }
+  if (pulse.level === "forming") {
+    return "داده‌های جلسه هنوز در حال شکل‌گیری است.";
+  }
+
+  const byCode = new Map(quotes.map((q) => [q.code, q]));
+  const core = PULSE_CODES.map((c) => byCode.get(c)).filter(
+    (q): q is Quote => Boolean(q),
+  );
+  const movers = [...core].sort(
+    (a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent),
+  );
+  const lead = movers[0];
+
+  if (pulse.level === "turbulent") {
+    if (lead && Math.abs(lead.changePercent) >= 0.15) {
+      return `دامنهٔ حرکت امروز بالاست؛ ${lead.currency.nameFa} بیشترین جابه‌جایی را داشته است.`
+    }
+    return "دامنهٔ حرکت نمادهای اصلی امروز بالاتر از حالت عادی است.";
+  }
+  if (pulse.level === "calm") {
+    return "بازار نسبتاً آرام است؛ دامنهٔ حرکت نمادهای اصلی محدود بوده است.";
+  }
+  if (lead && Math.abs(lead.changePercent) >= 0.2) {
+    const dir =
+      lead.changePercent > 0 ? "مثبت" : lead.changePercent < 0 ? "منفی" : "ثابت";
+    return `نوسان در بازهٔ عادی؛ ${lead.currency.nameFa} ${dir} (${formatPercent(lead.changePercent)}).`;
+  }
+  return "نوسان نمادهای اصلی در بازهٔ عادی روزهای اخیر است.";
 }
 
 /** Three dots: intensity grows with pulse level. */
@@ -233,65 +293,151 @@ export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
 }
 
 export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
-  const [pulseOpen, setPulseOpen] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [copied, setCopied] = useState(false);
   const open = snapshot.marketOpen;
-  const stamp = `${formatTehranDate(snapshot.fetchedAt)} · ${formatTehranTime(snapshot.fetchedAt)}`;
   const pulse = computeMarketPulse(snapshot.quotes, {
     marketOpen: snapshot.marketOpen,
   });
+  const relative = formatRelativeFa(snapshot.fetchedAt);
+  const absolute = `${formatTehranDate(snapshot.fetchedAt)} · ${formatTehranTime(snapshot.fetchedAt)}`;
+  const narrative = marketNarrative(open, pulse, snapshot.quotes);
+  const chip = sourceChip(snapshot.sourceName);
+
+  async function copyStatus(e: React.MouseEvent) {
+    e.stopPropagation();
+    const text = [
+      "بازار آزاد تهران",
+      open ? "باز · آخرین نرخ جاری" : "تعطیل · آخرین جلسه",
+      `نبض · ${pulse.label}`,
+      absolute,
+      narrative,
+    ].join(" · ");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // ignore
+    }
+  }
 
   return (
-    <div className="rounded-xl bg-card px-4 py-3 shadow-card">
-      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-        <span className="text-sm font-medium">بازار آزاد تهران</span>
+    <div
+      className={`rounded-xl border bg-card px-4 py-3 shadow-card ${statusBorderClass(open, pulse.level)}`}
+    >
+      {/* Row 1: title + live status */}
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+        <span className="text-sm font-semibold tracking-tight">
+          بازار آزاد تهران
+        </span>
         <span
           className={
             open
-              ? "rounded-full bg-up/12 px-2 py-0.5 text-xs text-up"
-              : "rounded-full bg-card-2 px-2 py-0.5 text-xs text-muted"
+              ? "inline-flex items-center gap-1.5 rounded-full bg-up/12 px-2 py-0.5 text-xs text-up"
+              : "inline-flex items-center gap-1.5 rounded-full bg-card-2 px-2 py-0.5 text-xs text-muted"
           }
         >
-          {open ? "آخرین نرخ جاری" : "تعطیل / آخرین جلسه"}
+          <span
+            className={
+              open
+                ? "size-1.5 shrink-0 rounded-full bg-up"
+                : "size-1.5 shrink-0 rounded-full bg-subtle"
+            }
+            aria-hidden
+          />
+          {open ? "باز · نرخ جاری" : "تعطیل · آخرین جلسه"}
         </span>
-        <button
-          type="button"
-          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs transition-opacity ${pulseBadgeClass(pulse.level)} ${pulseOpen ? "ring-1 ring-border" : ""}`}
-          onClick={() => setPulseOpen((v) => !v)}
-          aria-expanded={pulseOpen}
-          aria-controls="market-pulse-hint"
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs ${pulseBadgeClass(pulse.level)}`}
         >
           <PulseDots level={pulse.level} />
           <span>نبض · {pulse.label}</span>
+        </span>
+        <a
+          href={snapshot.sourceUrl}
+          target="_blank"
+          rel="noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="rounded-full bg-card-2 px-2 py-0.5 text-[0.6875rem] text-subtle transition-colors hover:text-foreground"
+          title={snapshot.sourceName}
+        >
+          {chip}
+        </a>
+      </div>
+
+      {/* Row 2: time hierarchy */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-subtle">
+        <time dateTime={snapshot.fetchedAt} className="tabular-nums">
+          {absolute}
+        </time>
+        <span aria-hidden className="text-border">
+          ·
+        </span>
+        <span className="text-muted">{relative}</span>
+        <button
+          type="button"
+          onClick={(e) => void copyStatus(e)}
+          className="ms-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-subtle transition-colors hover:bg-card-2 hover:text-foreground"
+          aria-label="کپی وضعیت بازار"
+        >
+          {copied ? (
+            <>
+              <Check className="size-3" />
+              <span>کپی شد</span>
+            </>
+          ) : (
+            <>
+              <Copy className="size-3" />
+              <span className="hidden sm:inline">کپی</span>
+            </>
+          )}
         </button>
       </div>
-      {pulseOpen ? (
-        <p
-          id="market-pulse-hint"
-          className="mt-2 rounded-lg bg-card-2 px-3 py-2 text-xs leading-relaxed text-muted"
+
+      {/* Row 3: narrative */}
+      <p className="mt-2 text-sm leading-relaxed text-muted">{narrative}</p>
+
+      {/* Expandable detail */}
+      <button
+        type="button"
+        className="mt-2 text-xs text-subtle underline-offset-2 hover:text-foreground hover:underline"
+        onClick={() => setOpenDetail((v) => !v)}
+        aria-expanded={openDetail}
+        aria-controls="market-status-detail"
+      >
+        {openDetail ? "بستن جزئیات" : "جزئیات نبض و محاسبه"}
+      </button>
+
+      {openDetail ? (
+        <div
+          id="market-status-detail"
+          className="mt-2 space-y-1.5 rounded-lg bg-card-2 px-3 py-2.5 text-xs leading-relaxed text-muted"
           role="note"
         >
-          {pulse.hint}
+          <p>{pulse.hint}</p>
           {pulse.score != null ? (
-            <span className="mt-1 block text-subtle tabular-nums">
+            <p className="tabular-nums text-subtle">
               میانگین دامنهٔ نمادهای اصلی: حدود{" "}
               {pulse.score.toLocaleString("fa-IR", {
                 maximumFractionDigits: 1,
               })}
               ٪
-            </span>
+            </p>
           ) : null}
-        </p>
+          <p className="text-subtle">
+            نبض از میانگین دامنهٔ روزانهٔ دلار، یورو، درهم، طلای ۱۸ و سکه امامی
+            نسبت به قیمت میانی همان روز به‌دست می‌آید.
+          </p>
+          {snapshot.note ? (
+            <p className="border-t border-border pt-1.5">{snapshot.note}</p>
+          ) : (
+            <p className="border-t border-border pt-1.5 text-subtle">
+              قیمت‌ها به تومان است. هر تومان برابر ۱۰ ریال.
+            </p>
+          )}
+        </div>
       ) : null}
-      <time
-        dateTime={snapshot.fetchedAt}
-        className="mt-1 block text-xs text-subtle tabular-nums"
-      >
-        {stamp}
-      </time>
-      <p className="mt-1.5 text-sm text-muted">
-        {snapshot.note ??
-          "قیمت‌ها به تومان است. هر تومان برابر ۱۰ ریال."}
-      </p>
     </div>
   );
 }
