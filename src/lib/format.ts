@@ -94,6 +94,28 @@ export function formatChartTick(iso: string): string {
 }
 
 /**
+ * Relative age in Persian, Tehran wall-clock context.
+ * e.g. «همین الان» · «۳ دقیقه پیش» · «۲ ساعت پیش»
+ */
+export function formatRelativeFa(iso: string | number | Date): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const sec = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+  if (sec < 45) return "همین الان";
+  if (sec < 3600) {
+    const m = Math.floor(sec / 60);
+    return `${toFaDigits(m)} دقیقه پیش`;
+  }
+  if (sec < 86400) {
+    const h = Math.floor(sec / 3600);
+    return `${toFaDigits(h)} ساعت پیش`;
+  }
+  const days = Math.floor(sec / 86400);
+  if (days === 1) return "دیروز";
+  return `${toFaDigits(days)} روز پیش`;
+}
+
+/**
  * Shareable price text (format 4):
  * دلار آمریکا: ۱۱۵٬۴۲۰ تومان
  * ۹ مهر ۱۴۰۵ — ۱۴:۳۰
