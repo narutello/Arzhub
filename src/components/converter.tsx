@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
-import { ArrowLeftRight, Check, Link2 } from "lucide-react";
+import { ArrowLeftRight, Check, Copy } from "lucide-react";
 import { numberToWords } from "@persian-tools/persian-tools";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,6 +140,27 @@ function isPerGramGold(c: Currency): boolean {
   return c.code === "XAU18" || Boolean(c.quoteUnitLabel?.includes("گرم"));
 }
 
+function formatResultAmount(toCur: Currency, value: number): string {
+  return toCur.code === "IRT"
+    ? formatToman(value, 0)
+    : formatNumber(value, resultDecimals(toCur, value));
+}
+
+/** Clipboard text: «۱ دلار آمریکا برابر است با ۲۶۷٬۹۰۰ تومان» */
+function buildResultCopyText(
+  amountLabel: string,
+  fromCur: Currency,
+  toCur: Currency,
+  result: number,
+): string {
+  const fromUnit = fromCur.quoteUnitLabel ? ` (${fromCur.quoteUnitLabel})` : "";
+  const toUnit = toCur.quoteUnitLabel ? ` · ${toCur.quoteUnitLabel}` : "";
+  const resultLabel = formatResultAmount(toCur, result);
+  const toName =
+    toCur.code === "IRT" ? "تومان" : `${toCur.nameFa}${toUnit}`;
+  return `${amountLabel || "۰"}${fromUnit} ${fromCur.nameFa} برابر است با ${resultLabel} ${toName}`;
+}
+
 export function Converter({
   quotes,
   defaultFrom = "USD",
@@ -233,25 +254,11 @@ export function Converter({
     setTo(from);
   }
 
-  async function shareLink() {
-    const path = buildSharePath(from, to, amount);
-    const url = `${window.location.origin}${path}`;
-
+  async function copyResult() {
+    if (result == null) return;
+    const text = buildResultCopyText(amount, fromCur, toCur, result);
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "تبدیل ارز | ارزهاب",
-          text: `${amount || "۰"} ${fromCur.nameFa} → ${toCur.nameFa}`,
-          url,
-        });
-        return;
-      }
-    } catch {
-      // cancelled
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -271,9 +278,10 @@ export function Converter({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => void shareLink()}
+            onClick={() => void copyResult()}
+            disabled={result == null}
             className="h-8 gap-1.5 px-2.5 text-xs"
-            aria-label="اشتراک لینک تبدیل"
+            aria-label="کپی نتیجه تبدیل"
           >
             {copied ? (
               <>
@@ -282,8 +290,8 @@ export function Converter({
               </>
             ) : (
               <>
-                <Link2 className="size-3.5" />
-                اشتراک
+                <Copy className="size-3.5" />
+                کپی نتیجه
               </>
             )}
           </Button>
@@ -360,9 +368,7 @@ export function Converter({
                 {fromCur.flag} {fromCur.nameFa} برابر است با
               </p>
               <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight break-all leading-snug">
-                {toCur.code === "IRT"
-                  ? formatToman(result, 0)
-                  : formatNumber(result, resultDecimals(toCur, result))}{" "}
+                {formatResultAmount(toCur, result)}{" "}
                 <span className="text-base font-medium text-muted">
                   {toCur.flag} {toCur.nameFa}
                   {toCur.quoteUnitLabel ? ` · ${toCur.quoteUnitLabel}` : ""}
