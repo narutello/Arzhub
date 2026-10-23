@@ -45,7 +45,7 @@ export const CRYPTO_ITEMS: Currency[] = [
     kind: "crypto",
   },
   {
-    code: "TON",
+    code: "GRAM",
     nameFa: "گرام (تون)",
     nameEn: "Gram (Ton)",
     countryFa: "رمزارز",
