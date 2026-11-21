@@ -26,19 +26,23 @@ type CacheEntry<T> = { at: number; value: T };
 let ratesCache: CacheEntry<Snapshot> | null = null;
 const chartCache = new Map<string, CacheEntry<ChartResult>>();
 
-function parseNum(raw: unknown): number {
-  if (typeof raw === "number") return raw;
+/** Parse a price-like value coming from TGJU / Bonbast into a finite number. */
+export function parseNum(raw: unknown): number {
+  if (typeof raw === "number") return Number.isFinite(raw) ? raw : NaN;
+  if (raw == null) return NaN;
   if (typeof raw !== "string") return NaN;
-  const cleaned = raw.replace(/,/g, "").replace(/[^\d.-]/g, "");
+  const cleaned = raw.replace(/,/g, "").replace(/[^\d.-]/g, "").trim();
+  if (!cleaned || cleaned === "-" || cleaned === "." || cleaned === "-.") return NaN;
   return Number(cleaned);
 }
 
-function rialToToman(rial: number): number {
+/** Convert Iranian Rial to Toman (1 Toman = 10 Rial). */
+export function rialToToman(rial: number): number {
   return rial / 10;
 }
 
 /** True when `iso` falls on today's calendar date in Asia/Tehran. */
-function isSameTehranDay(iso: string | null): boolean {
+export function isSameTehranDay(iso: string | null): boolean {
   if (!iso) return false;
   try {
     const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -54,7 +58,7 @@ function isSameTehranDay(iso: string | null): boolean {
 }
 
 /** Newest non-null quote timestamp (ISO strings compare lexicographically). */
-function newestUpdatedAt(quotes: Quote[]): string | null {
+export function newestUpdatedAt(quotes: Quote[]): string | null {
   let best: string | null = null;
   for (const q of quotes) {
     if (q.updatedAt && (!best || q.updatedAt > best)) best = q.updatedAt;
@@ -62,7 +66,7 @@ function newestUpdatedAt(quotes: Quote[]): string | null {
   return best;
 }
 
-function marketStatusFromQuotes(quotes: Quote[]): {
+export function marketStatusFromQuotes(quotes: Quote[]): {
   marketOpen: boolean;
   note: string | null;
 } {
@@ -75,7 +79,7 @@ function marketStatusFromQuotes(quotes: Quote[]): {
   };
 }
 
-function directionOf(change: number): Quote["direction"] {
+export function directionOf(change: number): Quote["direction"] {
   if (change > 0) return "up";
   if (change < 0) return "down";
   return "flat";
@@ -107,7 +111,7 @@ async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
   return res.json();
 }
 
-function quotesFromTgju(current: Record<string, TgjuTick>): Quote[] {
+export function quotesFromTgju(current: Record<string, TgjuTick>): Quote[] {
   const quotes: Quote[] = [];
   for (const currency of CURRENCIES) {
     const tick = current[currency.tgjuKey];
@@ -211,8 +215,8 @@ async function fetchBonbastSnapshot(): Promise<Snapshot> {
     const sell = parseNum(json[`${currency.bonbastKey}1`]);
     if (!Number.isFinite(sell) || sell <= 0) continue;
     let price = sell;
+    // Bonbast lists JPY per 10 yen; we display per 100 yen (quoteUnit = 100).
     if (currency.code === "JPY") {
-      // Bonbast lists JPY per 10 yen; we display per 100 yen.
       price = sell * 10;
     }
     quotes.push({
@@ -276,7 +280,7 @@ export async function fetchSnapshot(): Promise<MarketResult> {
   }
 }
 
-function parseHistoryRow(row: unknown): ChartPoint | null {
+export function parseHistoryRow(row: unknown): ChartPoint | null {
   if (!Array.isArray(row) || row.length < 8) return null;
   const open = rialToToman(parseNum(row[0]));
   const low = rialToToman(parseNum(row[1]));
