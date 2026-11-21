@@ -261,7 +261,7 @@ export function MetalsSection({ quotes }: { quotes: Quote[] }) {
         <h2 className="text-base font-medium">طلا و سکه</h2>
         <span className="text-xs text-subtle">قیمت به تومان</span>
       </div>
-      <div className="divide-y divide-border rounded-xl bg-card px-1 py-1 shadow-card">
+      <div className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-card">
         {metals.map((quote) => (
           <CurrencyRow key={quote.code} quote={quote} />
         ))}
@@ -272,7 +272,7 @@ export function MetalsSection({ quotes }: { quotes: Quote[] }) {
 
 export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
   return (
-    <div className="flex flex-col gap-1 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-1 border-t border-border pt-4 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
       <p>
         منبع:{" "}
         <a
@@ -284,7 +284,7 @@ export function SourceBar({ snapshot }: { snapshot: Snapshot }) {
           {snapshot.sourceName}
         </a>
       </p>
-      <p>
+      <p className="tabular-nums">
         آخرین به‌روزرسانی: {formatTehranDate(snapshot.fetchedAt)}،{" "}
         {formatTehranTime(snapshot.fetchedAt)}
       </p>
@@ -324,7 +324,7 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
 
   return (
     <div
-      className={`rounded-xl border bg-card px-4 py-3 shadow-card ${statusBorderClass(open, pulse.level)}`}
+      className={`rounded-xl border bg-card px-4 py-3.5 shadow-card ${statusBorderClass(open, pulse.level)}`}
     >
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
         <span className="text-sm font-semibold tracking-tight">
@@ -392,7 +392,7 @@ export function MarketStatus({ snapshot }: { snapshot: Snapshot }) {
         </button>
       </div>
 
-      <p className="mt-2 text-sm leading-relaxed text-muted">{narrative}</p>
+      <p className="mt-2.5 text-sm leading-relaxed text-muted">{narrative}</p>
 
       <button
         type="button"
@@ -448,17 +448,17 @@ function MoverList({
 }) {
   return (
     <section className="rounded-xl bg-card p-4 shadow-card">
-      <h2 className="mb-3 text-sm font-medium">{title}</h2>
+      <h2 className="mb-3 text-sm font-medium text-muted">{title}</h2>
       {quotes.length === 0 ? (
         <p className="text-sm text-muted">{empty}</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {quotes.map((q) => (
             <li key={q.code}>
               <Link
                 to="/currencies/$code"
                 params={{ code: q.code.toLowerCase() }}
-                className="flex items-center gap-3 rounded-md py-1"
+                className="flex items-center gap-3 rounded-lg px-1 py-1.5 transition-colors hover:bg-card-2/60"
               >
                 <CodeMark code={q.code} />
                 <span className="min-w-0 flex-1 truncate text-sm">
