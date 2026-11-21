@@ -72,21 +72,36 @@ function Home() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Page intro — compact, not competing with market status */}
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">بازار ارز و طلا</h1>
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+          بازار ارز و طلا
+        </h1>
         <p className="text-sm text-muted">
-          قیمت‌های بازار آزاد تهران — ارز، طلا، سکه و رمزارز.
+          نرخ‌های بازار آزاد تهران به تومان
         </p>
       </header>
+
       {offline ? <OfflineBanner /> : null}
       {stale && error ? <StaleBanner message={error} /> : null}
-      <MarketStatus snapshot={snapshot} />
-      <FeaturedGrid quotes={snapshot.quotes} />
-      {!searching ? <MetalsSection quotes={snapshot.quotes} /> : null}
-      {!searching ? <CryptoSection quotes={snapshot.quotes} /> : null}
-      <Movers quotes={snapshot.quotes} />
 
+      {/* Primary signal */}
+      <MarketStatus snapshot={snapshot} />
+
+      {/* Featured currencies */}
+      <FeaturedGrid quotes={snapshot.quotes} />
+
+      {/* Secondary market blocks — only when not searching */}
+      {!searching ? (
+        <div className="space-y-8">
+          <MetalsSection quotes={snapshot.quotes} />
+          <CryptoSection quotes={snapshot.quotes} />
+          <Movers quotes={snapshot.quotes} />
+        </div>
+      ) : null}
+
+      {/* Full list + search */}
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3">
           <h2 className="text-base font-medium">
@@ -107,7 +122,7 @@ function Home() {
         {(searching ? filtered : fxOnly).length === 0 ? (
           <EmptySearch query={q} />
         ) : (
-          <div className="divide-y divide-border rounded-xl bg-card px-1 py-1 shadow-card">
+          <div className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-card">
             {(searching ? filtered : fxOnly).map((quote) => (
               <CurrencyRow key={quote.code} quote={quote} />
             ))}

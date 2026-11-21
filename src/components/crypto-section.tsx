@@ -22,7 +22,7 @@ export function CryptoSection({ quotes }: { quotes: Quote[] }) {
         </div>
         <UnitSwitch unit={unit} onChange={setUnit} />
       </div>
-      <div className="divide-y divide-border rounded-xl bg-card px-1 py-1 shadow-card">
+      <div className="divide-y divide-border overflow-hidden rounded-xl bg-card shadow-card">
         {cryptos.map((quote) => (
           <CryptoRow key={quote.code} quote={quote} unit={unit} />
         ))}
@@ -57,7 +57,7 @@ function UnitSwitch({
           className={
             unit === id
               ? "rounded-md bg-card px-2.5 py-1 font-medium text-foreground shadow-sm"
-              : "rounded-md px-2.5 py-1 text-muted"
+              : "rounded-md px-2.5 py-1 text-muted transition-colors hover:text-foreground"
           }
         >
           {label}
@@ -82,7 +82,7 @@ function CryptoRow({ quote, unit }: { quote: Quote; unit: CryptoUnit }) {
     <Link
       to="/currencies/$code"
       params={{ code: quote.code.toLowerCase() }}
-      className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-card-2/60"
+      className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-card-2/50 active:bg-card-2/70"
     >
       <CodeMark code={quote.code} />
       <div className="min-w-0 flex-1">
@@ -92,7 +92,7 @@ function CryptoRow({ quote, unit }: { quote: Quote; unit: CryptoUnit }) {
         </div>
       </div>
       <div className="text-end">
-        <div className="text-sm font-medium tabular-nums">
+        <div className="text-sm font-medium tabular-nums tracking-tight">
           <PriceValue value={price} decimals={decimals} />
           <span className="ms-1 text-xs font-normal text-subtle">{suffix}</span>
         </div>
