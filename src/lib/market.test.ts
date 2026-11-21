@@ -127,7 +127,7 @@ describe("quotesFromTgju", () => {
         d: "0",
         dp: "0",
         dt: "high",
-        ts: null,
+        // ts intentionally omitted (optional)
       },
     };
     const quotes = quotesFromTgju(current);
