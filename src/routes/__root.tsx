@@ -6,9 +6,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
-import { AuthProvider } from "@/lib/auth/provider";
 import { ChunkLoadRecovery } from "@/lib/chunk-load-recovery";
-import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { AppProviders } from "@/components/providers";
 import { Shell } from "@/components/shell";
 import appCss from "../styles.css?url";
@@ -67,14 +65,11 @@ function RootComponent() {
       </head>
       <body>
         <ChunkLoadRecovery />
-        <PreviewHostBridge />
-        <AuthProvider>
-          <AppProviders>
-            <Shell>
-              <Outlet />
-            </Shell>
-          </AppProviders>
-        </AuthProvider>
+        <AppProviders>
+          <Shell>
+            <Outlet />
+          </Shell>
+        </AppProviders>
         <Analytics />
         <Scripts />
       </body>
